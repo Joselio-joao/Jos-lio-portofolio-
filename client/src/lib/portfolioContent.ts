@@ -1,8 +1,15 @@
 export type PortfolioKind = "projectos" | "eventos" | "obras" | "certificados" | "instituicoes";
 export type PortfolioItem = { id: string; kind: PortfolioKind; title: string; description: string; category?: string; image?: string; pdf?: string; updatedAt: number };
+
 const REPOSITORY = "Joselio-joao/Jos-lio-portofolio-";
 const CONTENT_PATH = "client/public/data/portfolio-content.json";
+const UPLOADS_DIRECTORY = "client/public/uploads";
 const PUBLIC_CONTENT_URL = "/Jos-lio-portofolio-/data/portfolio-content.json";
+const PUBLIC_UPLOADS_URL = "/Jos-lio-portofolio-/uploads";
+
+type GitHubFile = { sha: string };
+type AssetKind = "image" | "pdf";
+type AssetDescriptor = { content: string; extension: string };
 
 export function normalizePortfolioItem(input: Pick<PortfolioItem, "kind" | "title" | "description"> & Partial<PortfolioItem>): PortfolioItem {
   return { id: input.id ?? crypto.randomUUID(), kind: input.kind, title: input.title.trim(), description: input.description.trim(), category: input.category?.trim() || undefined, image: input.image, pdf: input.pdf, updatedAt: input.updatedAt ?? Date.now() };
@@ -19,7 +26,13 @@ function encodeContent(value: string): string {
   return btoa(unescape(encodeURIComponent(value)));
 }
 
-type GitHubFile = { sha: string };
+function githubHeaders(token: string): HeadersInit {
+  return { Authorization: `Bearer ${token.trim()}`, Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28" };
+}
+
+function githubEndpoint(path: string): string {
+  return `https://api.github.com/repos/${REPOSITORY}/contents/${path.split("/").map(encodeURIComponent).join("/")}`;
+}
 
 async function githubError(response: Response, fallback: string): Promise<Error> {
   try {
@@ -30,15 +43,70 @@ async function githubError(response: Response, fallback: string): Promise<Error>
   }
 }
 
-export async function savePortfolioContent(items: PortfolioItem[], token: string): Promise<void> {
-  if (!token.trim()) throw new Error("Introduza um token do GitHub para publicar as alterações.");
-  const endpoint = `https://api.github.com/repos/${REPOSITORY}/contents/${CONTENT_PATH}`;
-  const headers = { Authorization: `Bearer ${token.trim()}`, Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28" };
+async function putGitHubFile(path: string, content: string, token: string, message: string): Promise<void> {
+  const endpoint = githubEndpoint(path);
+  const headers = githubHeaders(token);
   const current = await fetch(endpoint, { headers });
-  if (!current.ok) throw await githubError(current, "Não foi possível aceder ao ficheiro no GitHub. Confirme que o token tem acesso ao repositório e permissão Contents: Read and write");
-  const file = await current.json() as GitHubFile;
-  const update = await fetch(endpoint, { method: "PUT", headers: { ...headers, "Content-Type": "application/json" }, body: JSON.stringify({ message: "Atualizar conteúdos do portefólio", content: encodeContent(JSON.stringify(items, null, 2)), sha: file.sha }) });
+  let sha: string | undefined;
+
+  if (current.ok) {
+    sha = (await current.json() as GitHubFile).sha;
+  } else if (current.status !== 404) {
+    throw await githubError(current, "Não foi possível aceder ao ficheiro no GitHub. Confirme que o token tem acesso ao repositório e permissão Contents: Read and write");
+  }
+
+  const update = await fetch(endpoint, {
+    method: "PUT",
+    headers: { ...headers, "Content-Type": "application/json" },
+    body: JSON.stringify({ message, content, ...(sha ? { sha } : {}) }),
+  });
   if (!update.ok) throw await githubError(update, "O GitHub não aceitou a publicação");
+}
+
+export function getDataUrlAsset(dataUrl: string): AssetDescriptor | null {
+  const match = /^data:([^;,]+);base64,([A-Za-z0-9+/=]+)$/i.exec(dataUrl);
+  if (!match) return null;
+  const mime = match[1].toLowerCase();
+  const extensionByMime: Record<string, string> = {
+    "application/pdf": "pdf",
+    "image/jpeg": "jpg",
+    "image/png": "png",
+    "image/webp": "webp",
+    "image/gif": "gif",
+  };
+  const extension = extensionByMime[mime];
+  if (!extension) throw new Error("O formato do ficheiro selecionado não é suportado. Use PDF, JPG, PNG, WEBP ou GIF.");
+  return { content: match[2], extension };
+}
+
+export function publicUploadUrl(filename: string): string {
+  return `${PUBLIC_UPLOADS_URL}/${filename}`;
+}
+
+async function materializeAsset(value: string | undefined, itemId: string, kind: AssetKind, token: string): Promise<string | undefined> {
+  if (!value) return undefined;
+  const asset = getDataUrlAsset(value);
+  if (!asset) return value;
+
+  const filename = `${itemId}-${kind}.${asset.extension}`;
+  await putGitHubFile(`${UPLOADS_DIRECTORY}/${filename}`, asset.content, token, `Guardar ${kind === "image" ? "imagem" : "PDF"} do portefólio`);
+  return publicUploadUrl(filename);
+}
+
+export async function savePortfolioContent(items: PortfolioItem[], token: string): Promise<PortfolioItem[]> {
+  if (!token.trim()) throw new Error("Introduza um token do GitHub para publicar as alterações.");
+
+  const publishedItems: PortfolioItem[] = [];
+  for (const item of items) {
+    publishedItems.push({
+      ...item,
+      image: await materializeAsset(item.image, item.id, "image", token),
+      pdf: await materializeAsset(item.pdf, item.id, "pdf", token),
+    });
+  }
+
+  await putGitHubFile(CONTENT_PATH, encodeContent(JSON.stringify(publishedItems, null, 2)), token, "Atualizar conteúdos do portefólio");
+  return publishedItems;
 }
 
 export function readFileAsDataUrl(file: File): Promise<string> {
