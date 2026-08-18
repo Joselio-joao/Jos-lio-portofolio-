@@ -1,11 +1,12 @@
 import { useMemo, useState } from "react";
 import { Award, Building2, CalendarDays, FolderKanban, Hammer, Home, Search, Linkedin } from "lucide-react";
-import { certificates, groups } from "./Home";
+import { certificates, groups } from "./portfolioData";
 import { Link } from "wouter";
 
 const base = "/Jos-lio-portofolio-";
 const LINKEDIN = "https://www.linkedin.com/in/josélio-joão-b02776424";
 export const navItems = [
+  { href: `${base}/`, label: "Perfil", icon: Home },
   { href: `${base}/projectos`, label: "Projectos", icon: FolderKanban },
   { href: `${base}/eventos`, label: "Eventos", icon: CalendarDays },
   { href: `${base}/obras`, label: "Obras", icon: Hammer },
