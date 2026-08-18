@@ -1,15 +1,15 @@
 {
-  "name": "Super Tracker do Josélio",
-  "short_name": "Super Tracker",
-  "description": "Estudo, universidade, bolsas e hábitos num só lugar.",
+  "name": "Josélio João — Portefólio",
+  "short_name": "Portefólio Josélio",
+  "description": "Percurso académico, instituições e certificados de Josélio João.",
   "lang": "pt-PT",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#F7F6F1",
-  "theme_color": "#2457C5",
+  "background_color": "#EEF2FF",
+  "theme_color": "#101A31",
   "icons": [
     {
-      "src": "./assets/super-tracker-logo.png",
+      "src": "./assets/logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
