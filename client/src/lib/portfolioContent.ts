@@ -1,7 +1,8 @@
 import { loadStoredData, saveStoredData } from "./offlineStorage";
 
 export type PortfolioKind = "projectos" | "eventos" | "obras" | "certificados" | "instituicoes";
-export type PortfolioItem = { id: string; kind: PortfolioKind; title: string; description: string; category?: string; image?: string; pdf?: string; externalUrl?: string; updatedAt: number };
+export type PortfolioAttachment = { url: string; name: string; mime: string; type: "office" | "video" };
+export type PortfolioItem = { id: string; kind: PortfolioKind; title: string; description: string; category?: string; image?: string; pdf?: string; attachment?: PortfolioAttachment; externalUrl?: string; updatedAt: number };
 
 const REPOSITORY = "Joselio-joao/Jos-lio-portofolio-";
 const CONTENT_PATH = "client/public/data/portfolio-content.json";
@@ -11,8 +12,19 @@ const PUBLIC_UPLOADS_URL = "/Jos-lio-portofolio-/uploads";
 const PORTFOLIO_CACHE_KEY = "portfolio-content-cache-v1";
 
 type GitHubFile = { sha: string };
-type AssetKind = "image" | "pdf";
-type AssetDescriptor = { content: string; extension: string };
+type AssetKind = "image" | "pdf" | "attachment";
+type AssetDescriptor = { content: string; extension: string; mime: string; type?: "office" | "video" };
+
+const MAX_ATTACHMENT_BYTES = 25 * 1024 * 1024;
+const OFFICE_MIME: Record<string, string> = {
+  "application/msword": "doc",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx",
+  "application/vnd.ms-excel": "xls",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "xlsx",
+  "application/vnd.ms-powerpoint": "ppt",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation": "pptx",
+};
+const VIDEO_MIME: Record<string, string> = { "video/mp4": "mp4", "video/webm": "webm", "video/quicktime": "mov", "video/ogg": "ogv" };
 
 export function validateExternalUrl(value: string | undefined): string | undefined {
   const url = value?.trim();
@@ -97,16 +109,10 @@ export function getDataUrlAsset(dataUrl: string): AssetDescriptor | null {
   const match = /^data:([^;,]+);base64,([A-Za-z0-9+/=]+)$/i.exec(dataUrl);
   if (!match) return null;
   const mime = match[1].toLowerCase();
-  const extensionByMime: Record<string, string> = {
-    "application/pdf": "pdf",
-    "image/jpeg": "jpg",
-    "image/png": "png",
-    "image/webp": "webp",
-    "image/gif": "gif",
-  };
+  const extensionByMime: Record<string, string> = { "application/pdf": "pdf", "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif", ...OFFICE_MIME, ...VIDEO_MIME };
   const extension = extensionByMime[mime];
-  if (!extension) throw new Error("O formato do ficheiro selecionado não é suportado. Use PDF, JPG, PNG, WEBP ou GIF.");
-  return { content: match[2], extension };
+  if (!extension) throw new Error("Formato não suportado. Use PDF, imagem, Word, Excel, PowerPoint ou vídeo MP4/WebM/MOV.");
+  return { content: match[2], extension, mime, ...(OFFICE_MIME[mime] ? { type: "office" as const } : VIDEO_MIME[mime] ? { type: "video" as const } : {}) };
 }
 
 export function publicUploadUrl(filename: string): string {
@@ -118,8 +124,17 @@ async function materializeAsset(value: string | undefined, itemId: string, kind:
   const asset = getDataUrlAsset(value);
   if (!asset) return value;
   const filename = `${itemId}-${kind}.${asset.extension}`;
-  await putGitHubFile(`${UPLOADS_DIRECTORY}/${filename}`, asset.content, token, `Guardar ${kind === "image" ? "imagem" : "PDF"} do portefólio`);
+  await putGitHubFile(`${UPLOADS_DIRECTORY}/${filename}`, asset.content, token, `Guardar ${kind === "image" ? "imagem" : kind === "pdf" ? "PDF" : "anexo"} do portefólio`);
   return publicUploadUrl(filename);
+}
+
+async function materializeAttachment(value: PortfolioAttachment | undefined, itemId: string, token: string): Promise<PortfolioAttachment | undefined> {
+  if (!value) return undefined;
+  const asset = getDataUrlAsset(value.url);
+  if (!asset?.type) return value;
+  const filename = `${itemId}-attachment.${asset.extension}`;
+  await putGitHubFile(`${UPLOADS_DIRECTORY}/${filename}`, asset.content, token, `Guardar anexo ${value.name}`);
+  return { url: publicUploadUrl(filename), name: value.name, mime: asset.mime, type: asset.type };
 }
 
 export async function savePortfolioContent(items: PortfolioItem[], token: string): Promise<PortfolioItem[]> {
@@ -131,6 +146,7 @@ export async function savePortfolioContent(items: PortfolioItem[], token: string
       ...item,
       image: await materializeAsset(item.image, item.id, "image", token),
       pdf: await materializeAsset(item.pdf, item.id, "pdf", token),
+      attachment: await materializeAttachment(item.attachment, item.id, token),
       externalUrl: validateExternalUrl(item.externalUrl),
     });
   }
@@ -141,6 +157,7 @@ export async function savePortfolioContent(items: PortfolioItem[], token: string
 }
 
 export function readFileAsDataUrl(file: File): Promise<string> {
+  if (file.size > MAX_ATTACHMENT_BYTES) return Promise.reject(new Error("Cada anexo deve ter no máximo 25 MB para publicação no GitHub."));
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(String(reader.result));

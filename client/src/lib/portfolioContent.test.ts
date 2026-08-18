@@ -11,7 +11,9 @@ describe("portfolio content", () => {
   });
 
   it("converts a supported data URL into file content and an extension", () => {
-    expect(getDataUrlAsset("data:application/pdf;base64,QUJD")).toEqual({ content: "QUJD", extension: "pdf" });
+    expect(getDataUrlAsset("data:application/pdf;base64,QUJD")).toEqual({ content: "QUJD", extension: "pdf", mime: "application/pdf" });
+    expect(getDataUrlAsset("data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,QUJD")).toMatchObject({ extension: "docx", mime: "application/vnd.openxmlformats-officedocument.wordprocessingml.document", type: "office" });
+    expect(getDataUrlAsset("data:video/mp4;base64,QUJD")).toMatchObject({ extension: "mp4", mime: "video/mp4", type: "video" });
     expect(getDataUrlAsset("/Jos-lio-portofolio-/uploads/already-published.pdf")).toBeNull();
   });
 
