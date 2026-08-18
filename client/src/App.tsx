@@ -8,7 +8,7 @@ import Home from "./pages/Home";
 
 
 function Router() {
-  const repositoryBase = "/Tracker-book-academico";
+  const repositoryBase = "/Jos-lio-portofolio-";
   const base = typeof window !== "undefined" && window.location.pathname.startsWith(repositoryBase)
     ? repositoryBase
     : "";
