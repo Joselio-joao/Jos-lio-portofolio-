@@ -6,6 +6,7 @@ import { Link } from "wouter";
 
 const base = "/Jos-lio-portofolio-";
 const LINKEDIN = "https://www.linkedin.com/in/josélio-joão-b02776424";
+const customCertificateImage = (item: PortfolioItem) => item.image || (item.category === "EF SET" ? "./assets/ef-set.png" : item.category === "UniAthena" ? "./assets/uniathena.png" : "./assets/ciq.jpg");
 export const navItems = [
   { href: `${base}/`, label: "Perfil", icon: Home },
   { href: `${base}/projectos`, label: "Projectos", icon: FolderKanban },
@@ -36,7 +37,7 @@ export function PlaceholderPage({ title, eyebrow, icon: Icon, description, kind 
 export function CertificatesPage() {
   const [customItems, setCustomItems] = useState<PortfolioItem[]>([]);
   useEffect(() => { loadPortfolioContent().then((stored) => setCustomItems(stored.filter((item) => item.kind === "certificados"))); }, []);
-  const allCertificates = useMemo(() => [...certificates.map((item) => ({ ...item, externalUrl: item.pdf })), ...customItems.map((item) => ({ id: item.id, title: item.title, category: item.category || "Certificate", groupId: "custom", description: item.description, image: item.image || "./assets/ciq.jpg", pdf: item.pdf || "", externalUrl: item.externalUrl || item.pdf || "" }))], [customItems]);
+  const allCertificates = useMemo(() => [...certificates.map((item) => ({ ...item, externalUrl: item.pdf })), ...customItems.map((item) => ({ id: item.id, title: item.title, category: item.category || "Certificate", groupId: "custom", description: item.description, image: customCertificateImage(item), pdf: item.pdf || "", externalUrl: item.externalUrl || item.pdf || "" }))], [customItems]);
   const [groupId, setGroupId] = useState("all");
   const [category, setCategory] = useState("Todos");
   const [search, setSearch] = useState("");
@@ -48,6 +49,6 @@ export function CertificatesPage() {
 export function InstitutionsPage() {
   const [customItems, setCustomItems] = useState<PortfolioItem[]>([]);
   useEffect(() => { loadPortfolioContent().then((stored) => setCustomItems(stored.filter((item) => item.kind === "instituicoes"))); }, []);
-  const allGroups = [...groups, ...customItems.map((item) => ({ id: item.id, name: item.title, description: item.description, image: item.image || "./assets/ciq.jpg" }))];
-  return <PortfolioShell title="Instituições" eyebrow="Percurso académico"><div className="mt-8 grid gap-3 sm:grid-cols-2">{allGroups.map((group) => <article key={group.id} className="flex items-center gap-4 rounded-2xl border border-[#dbe3f0] bg-white p-4 shadow-sm"><img src={group.image} alt={group.name} className="h-16 w-16 rounded-xl object-cover" /><div><h2 className="font-semibold text-[#17233e]">{group.name}</h2><p className="mt-1 text-xs leading-5 text-muted-foreground">{group.description}</p></div></article>)}</div></PortfolioShell>;
+  const allGroups = [...groups.map((group) => ({ ...group, externalUrl: undefined })), ...customItems.map((item) => ({ id: item.id, name: item.title, description: item.description, image: item.image || "./assets/ciq.jpg", externalUrl: item.externalUrl }))];
+  return <PortfolioShell title="Instituições" eyebrow="Percurso académico"><div className="mt-8 grid gap-3 sm:grid-cols-2">{allGroups.map((group) => <article key={group.id} className="flex items-center gap-4 rounded-2xl border border-[#dbe3f0] bg-white p-4 shadow-sm"><img src={group.image} alt={group.name} className="h-16 w-16 rounded-xl object-cover" /><div><h2 className="font-semibold text-[#17233e]">{group.name}</h2><p className="mt-1 text-xs leading-5 text-muted-foreground">{group.description}</p>{group.externalUrl && <a href={group.externalUrl} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline">Abrir ligação <ExternalLink className="h-3.5 w-3.5" /></a>}</div></article>)}</div></PortfolioShell>;
 }
