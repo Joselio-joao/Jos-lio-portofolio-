@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { getDataUrlAsset, normalizePortfolioItem, publicUploadUrl, validateExternalUrl } from "./portfolioContent";
+import { describe, expect, it, vi } from "vitest";
+import { getDataUrlAsset, loadPortfolioContent, normalizePortfolioItem, publicUploadUrl, validateExternalUrl } from "./portfolioContent";
 
 describe("portfolio content", () => {
   it("normalizes required fields and optional metadata", () => {
@@ -22,5 +22,11 @@ describe("portfolio content", () => {
   it("keeps only safe HTTP(S) external links", () => {
     expect(validateExternalUrl("https://example.org/documento")).toBe("https://example.org/documento");
     expect(() => validateExternalUrl("javascript:alert(1)")).toThrow("A ligação externa deve começar");
+  });
+
+  it("loads public content even when local cache is unavailable", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => [{ id: "public-1", kind: "projectos", title: "Projeto público", description: "Conteúdo", updatedAt: 1 }] }));
+    await expect(loadPortfolioContent()).resolves.toEqual([{ id: "public-1", kind: "projectos", title: "Projeto público", description: "Conteúdo", updatedAt: 1 }]);
+    vi.unstubAllGlobals();
   });
 });

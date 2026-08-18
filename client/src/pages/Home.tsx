@@ -1,4 +1,5 @@
 import { ArrowUpRight, Award, Building2, CalendarDays, FolderKanban, Hammer, Linkedin, UserRound } from "lucide-react";
+import { Link } from "wouter";
 
 const LINKEDIN = "https://www.linkedin.com/in/josélio-joão-b02776424";
 const BASE = "/Jos-lio-portofolio-";
@@ -13,7 +14,7 @@ const navItems = [
 ];
 
 function BottomNav() {
-  return <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-[#dbe3f0] bg-white/95 px-2 pb-[env(safe-area-inset-bottom)] pt-2 shadow-[0_-8px_24px_rgba(23,35,62,.08)] backdrop-blur-xl" aria-label="Navegação principal"><div className="mx-auto grid max-w-3xl grid-cols-6 gap-1">{navItems.map(({ href, label, icon: Icon }) => <a key={href} href={href} aria-current={label === "Perfil" ? "page" : undefined} className={`flex flex-col items-center gap-1 rounded-lg px-1 py-1.5 text-[9px] font-semibold transition ${label === "Perfil" ? "bg-[#17233e] text-white" : "text-[#65718a] hover:bg-[#f0edff] hover:text-[#6c5ce7]"}`}><Icon className="h-4 w-4" />{label}</a>)}</div></nav>;
+  return <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-[#dbe3f0] bg-white/95 px-2 pb-[env(safe-area-inset-bottom)] pt-2 shadow-[0_-8px_24px_rgba(23,35,62,.08)] backdrop-blur-xl" aria-label="Navegação principal"><div className="mx-auto grid max-w-3xl grid-cols-6 gap-1">{navItems.map(({ href, label, icon: Icon }) => <Link key={href} href={href} aria-current={label === "Perfil" ? "page" : undefined} className={`flex flex-col items-center gap-1 rounded-lg px-1 py-1.5 text-[9px] font-semibold transition ${label === "Perfil" ? "bg-[#17233e] text-white" : "text-[#65718a] hover:bg-[#f0edff] hover:text-[#6c5ce7]"}`}><Icon className="h-4 w-4" />{label}</Link>)}</div></nav>;
 }
 
 export default function Home() {

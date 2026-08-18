@@ -1,3 +1,5 @@
+import { loadStoredData, saveStoredData } from "./offlineStorage";
+
 export type PortfolioKind = "projectos" | "eventos" | "obras" | "certificados" | "instituicoes";
 export type PortfolioItem = { id: string; kind: PortfolioKind; title: string; description: string; category?: string; image?: string; pdf?: string; externalUrl?: string; updatedAt: number };
 
@@ -6,6 +8,7 @@ const CONTENT_PATH = "client/public/data/portfolio-content.json";
 const UPLOADS_DIRECTORY = "client/public/uploads";
 const PUBLIC_CONTENT_URL = "/Jos-lio-portofolio-/data/portfolio-content.json";
 const PUBLIC_UPLOADS_URL = "/Jos-lio-portofolio-/uploads";
+const PORTFOLIO_CACHE_KEY = "portfolio-content-cache-v1";
 
 type GitHubFile = { sha: string };
 type AssetKind = "image" | "pdf";
@@ -27,11 +30,26 @@ export function normalizePortfolioItem(input: Pick<PortfolioItem, "kind" | "titl
   return { id: input.id ?? crypto.randomUUID(), kind: input.kind, title: input.title.trim(), description: input.description.trim(), category: input.category?.trim() || undefined, image: input.image, pdf: input.pdf, externalUrl: validateExternalUrl(input.externalUrl), updatedAt: input.updatedAt ?? Date.now() };
 }
 
+async function refreshPortfolioContent(): Promise<PortfolioItem[]> {
+  try {
+    const response = await fetch(PUBLIC_CONTENT_URL, { cache: "no-store" });
+    if (!response.ok) throw new Error(`Conteúdos públicos indisponíveis (${response.status}).`);
+    const payload: unknown = await response.json();
+    const items = Array.isArray(payload) ? payload as PortfolioItem[] : [];
+    await saveStoredData(PORTFOLIO_CACHE_KEY, items).catch(() => undefined);
+    return items;
+  } catch {
+    return [];
+  }
+}
+
 export async function loadPortfolioContent(): Promise<PortfolioItem[]> {
-  const response = await fetch(`${PUBLIC_CONTENT_URL}?v=${Date.now()}`, { cache: "no-store" });
-  if (!response.ok) return [];
-  const payload: unknown = await response.json();
-  return Array.isArray(payload) ? payload as PortfolioItem[] : [];
+  const cached = await loadStoredData<PortfolioItem[] | null>(PORTFOLIO_CACHE_KEY, null);
+  if (cached) {
+    void refreshPortfolioContent();
+    return cached;
+  }
+  return refreshPortfolioContent();
 }
 
 function encodeContent(value: string): string {
@@ -118,6 +136,7 @@ export async function savePortfolioContent(items: PortfolioItem[], token: string
   }
 
   await putGitHubFile(CONTENT_PATH, encodeContent(JSON.stringify(publishedItems, null, 2)), token, "Atualizar conteúdos do portefólio");
+  await saveStoredData(PORTFOLIO_CACHE_KEY, publishedItems).catch(() => undefined);
   return publishedItems;
 }
 
