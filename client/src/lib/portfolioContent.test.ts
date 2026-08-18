@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getDataUrlAsset, normalizePortfolioItem, publicUploadUrl } from "./portfolioContent";
+import { getDataUrlAsset, normalizePortfolioItem, publicUploadUrl, validateExternalUrl } from "./portfolioContent";
 
 describe("portfolio content", () => {
   it("normalizes required fields and optional metadata", () => {
@@ -17,5 +17,10 @@ describe("portfolio content", () => {
 
   it("builds a public GitHub Pages URL for an uploaded file", () => {
     expect(publicUploadUrl("projecto-imagem.png")).toBe("/Jos-lio-portofolio-/uploads/projecto-imagem.png");
+  });
+
+  it("keeps only safe HTTP(S) external links", () => {
+    expect(validateExternalUrl("https://example.org/documento")).toBe("https://example.org/documento");
+    expect(() => validateExternalUrl("javascript:alert(1)")).toThrow("A ligação externa deve começar");
   });
 });

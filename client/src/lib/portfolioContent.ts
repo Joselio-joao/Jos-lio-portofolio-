@@ -1,5 +1,5 @@
 export type PortfolioKind = "projectos" | "eventos" | "obras" | "certificados" | "instituicoes";
-export type PortfolioItem = { id: string; kind: PortfolioKind; title: string; description: string; category?: string; image?: string; pdf?: string; updatedAt: number };
+export type PortfolioItem = { id: string; kind: PortfolioKind; title: string; description: string; category?: string; image?: string; pdf?: string; externalUrl?: string; updatedAt: number };
 
 const REPOSITORY = "Joselio-joao/Jos-lio-portofolio-";
 const CONTENT_PATH = "client/public/data/portfolio-content.json";
@@ -11,8 +11,20 @@ type GitHubFile = { sha: string };
 type AssetKind = "image" | "pdf";
 type AssetDescriptor = { content: string; extension: string };
 
+export function validateExternalUrl(value: string | undefined): string | undefined {
+  const url = value?.trim();
+  if (!url) return undefined;
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") throw new Error();
+    return parsed.toString();
+  } catch {
+    throw new Error("A ligação externa deve começar por https:// ou http://.");
+  }
+}
+
 export function normalizePortfolioItem(input: Pick<PortfolioItem, "kind" | "title" | "description"> & Partial<PortfolioItem>): PortfolioItem {
-  return { id: input.id ?? crypto.randomUUID(), kind: input.kind, title: input.title.trim(), description: input.description.trim(), category: input.category?.trim() || undefined, image: input.image, pdf: input.pdf, updatedAt: input.updatedAt ?? Date.now() };
+  return { id: input.id ?? crypto.randomUUID(), kind: input.kind, title: input.title.trim(), description: input.description.trim(), category: input.category?.trim() || undefined, image: input.image, pdf: input.pdf, externalUrl: validateExternalUrl(input.externalUrl), updatedAt: input.updatedAt ?? Date.now() };
 }
 
 export async function loadPortfolioContent(): Promise<PortfolioItem[]> {
@@ -87,7 +99,6 @@ async function materializeAsset(value: string | undefined, itemId: string, kind:
   if (!value) return undefined;
   const asset = getDataUrlAsset(value);
   if (!asset) return value;
-
   const filename = `${itemId}-${kind}.${asset.extension}`;
   await putGitHubFile(`${UPLOADS_DIRECTORY}/${filename}`, asset.content, token, `Guardar ${kind === "image" ? "imagem" : "PDF"} do portefólio`);
   return publicUploadUrl(filename);
@@ -102,6 +113,7 @@ export async function savePortfolioContent(items: PortfolioItem[], token: string
       ...item,
       image: await materializeAsset(item.image, item.id, "image", token),
       pdf: await materializeAsset(item.pdf, item.id, "pdf", token),
+      externalUrl: validateExternalUrl(item.externalUrl),
     });
   }
 
