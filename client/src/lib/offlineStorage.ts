@@ -59,6 +59,23 @@ export function mergeLegacyTrackerData<T>(fallback: T, legacyValue: string | nul
   }
 }
 
+export async function loadStoredData<T>(key: string, fallback: T): Promise<T> {
+  try {
+    const database = await openDatabase();
+    const stored = await readRecord<T>(database, key);
+    database.close();
+    return stored?.value ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+export async function saveStoredData<T>(key: string, value: T): Promise<void> {
+  const database = await openDatabase();
+  await writeRecord(database, { key, value, updatedAt: Date.now() });
+  database.close();
+}
+
 export async function loadTrackerData<T>(fallback: T): Promise<T> {
   try {
     const database = await openDatabase();
