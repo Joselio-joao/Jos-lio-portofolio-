@@ -1,0 +1,74 @@
+/* Design direction: Caderno de Missão Académica — marfim, azul-caderno e hierarquia editorial para um tracker legível no telemóvel. */
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap');
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-serif: "DM Serif Display", Georgia, serif;
+  --font-sans: "Manrope", Arial, sans-serif;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius: 0.75rem;
+}
+
+:root {
+  --background: #f8f6ef;
+  --foreground: #17213a;
+  --card: #ffffff;
+  --card-foreground: #17213a;
+  --popover: #ffffff;
+  --popover-foreground: #17213a;
+  --primary: #2457c5;
+  --primary-foreground: #ffffff;
+  --secondary: #eff2f8;
+  --secondary-foreground: #26334f;
+  --muted: #f2f3ef;
+  --muted-foreground: #778092;
+  --accent: #e3ebff;
+  --accent-foreground: #1f438f;
+  --destructive: #bd4d48;
+  --destructive-foreground: #ffffff;
+  --border: #dfe2d7;
+  --input: #d9dfeb;
+  --ring: #2457c5;
+}
+
+@layer base {
+  * { @apply border-border outline-ring/50; }
+  html { background: #f8f6ef; }
+  body { @apply bg-background text-foreground font-sans; }
+  button, input, select { font-family: "Manrope", Arial, sans-serif; }
+  button:not(:disabled), [role="button"]:not([aria-disabled="true"]), [type="button"]:not(:disabled), [type="submit"]:not(:disabled), a[href], select:not(:disabled), input { @apply cursor-pointer; }
+}
+
+@layer components {
+  .tag { @apply text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#75809a]; }
+  input, [data-slot="select-trigger"] { @apply h-10 rounded-xl border-[#d7deea] bg-white text-sm font-semibold text-[#2b3752] shadow-none; }
+  input::placeholder { color: #a1a9b6; }
+  .notebook-rule { border-top: 1px dashed #d8ddcf; }
+  .mission-strip { background-image: linear-gradient(90deg, rgba(36, 87, 197, 0.06) 1px, transparent 1px); background-size: 18px 100%; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  main > div > * { animation: enter 260ms cubic-bezier(.23,1,.32,1) both; }
+  @keyframes enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+}
