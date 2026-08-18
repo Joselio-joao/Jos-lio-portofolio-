@@ -1,5 +1,15 @@
 [
   {
+    "kind": "projectos",
+    "title": "Clean layer",
+    "description": "A ClearLayer é uma startup pré-lançamento que pretende comercializar uma película fina, transparente e removível, aplicada sobre lentes de óculos já existentes, para as proteger de riscos e desgaste — a mesma lógica das películas de proteção de ecrã de telemóvel, aplicada a um mercado adjacente com 4 mil milhões de utilizadores potenciais em todo o mundo",
+    "category": "Acessorios ",
+    "id": "357fdc9e-3215-4bdb-8baa-da747eb1d024",
+    "image": "/Jos-lio-portofolio-/uploads/357fdc9e-3215-4bdb-8baa-da747eb1d024-image.png",
+    "externalUrl": "https://joselio-joao.github.io/Projecto-clear-layer-/?locale=pt-PT",
+    "updatedAt": 1787077899171
+  },
+  {
     "kind": "eventos",
     "title": "Literacia financeira ",
     "description": "Formação em Literacia Financeira, promovida pela Comissão Nacional de Angola para a UNESCO e patrocinada pelo Banco Millennium Atlântico, no âmbito da 5.ª Edição do Concurso Kandengue Escritor.",
