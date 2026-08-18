@@ -25,7 +25,7 @@ export function PortfolioShell({ title, eyebrow, children }: { title: string; ey
 }
 
 export function BottomNav() {
-  return <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-[#dbe3f0] bg-white/95 px-2 pb-[env(safe-area-inset-bottom)] pt-2 shadow-[0_-8px_24px_rgba(23,35,62,.08)] backdrop-blur-xl" aria-label="Navegação principal"><div className="mx-auto grid max-w-3xl grid-cols-6 gap-1">{navItems.map(({ href, label, icon: Icon }) => <Link key={href} href={href} className="flex flex-col items-center gap-1 rounded-lg px-1 py-1.5 text-[9px] font-semibold text-[#65718a] transition hover:bg-[#f0edff] hover:text-[#6c5ce7]"><Icon className="h-4 w-4" />{label}</Link>)}</div></nav>;
+  return <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-[#dbe3f0] bg-white/95 px-2 pb-[env(safe-area-inset-bottom)] pt-2 shadow-[0_-8px_24px_rgba(23,35,62,.08)] backdrop-blur-xl" aria-label="Navegação principal"><div className="mx-auto grid max-w-3xl grid-cols-6 gap-1">{navItems.map(({ href, label, icon: Icon }) => <Link key={href} href={href} className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl px-1.5 py-2.5 text-[10px] font-semibold leading-tight text-[#65718a] transition active:scale-[.98] hover:bg-[#f0edff] hover:text-[#6c5ce7] sm:text-xs"><Icon className="h-5 w-5" />{label}</Link>)}</div></nav>;
 }
 
 export function PlaceholderPage({ title, eyebrow, icon: Icon, description, kind }: { title: string; eyebrow: string; icon: typeof FolderKanban; description: string; kind: "projectos" | "eventos" | "obras" }) {
