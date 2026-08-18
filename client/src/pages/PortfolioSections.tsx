@@ -1,4 +1,6 @@
-import { Award, Building2, CalendarDays, FolderKanban, Hammer, Home, ArrowLeft } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Award, Building2, CalendarDays, FolderKanban, Hammer, Home, ArrowLeft, Search } from "lucide-react";
+import { certificates, groups } from "./Home";
 import { Link } from "wouter";
 
 const base = "/Jos-lio-portofolio-";
@@ -28,7 +30,12 @@ export function PlaceholderPage({ title, eyebrow, icon: Icon, description }: { t
 }
 
 export function CertificatesPage() {
-  return <PortfolioShell title="Certificados" eyebrow="Arquivo profissional"><section className="mt-8 rounded-2xl border border-[#dbe3f0] bg-white p-5 shadow-sm"><p className="text-sm leading-6 text-muted-foreground">A galeria documental continua disponível na página principal. Esta página própria organiza o acesso aos certificados por categoria e instituição.</p><Link href={`${base}/`} className="mt-5 inline-flex rounded-full bg-[#17233e] px-4 py-2 text-xs font-semibold text-white">Abrir galeria completa</Link></section></PortfolioShell>;
+  const [groupId, setGroupId] = useState("all");
+  const [category, setCategory] = useState("Todos");
+  const [search, setSearch] = useState("");
+  const categories = ["Todos", ...Array.from(new Set(certificates.map((item) => item.category)))];
+  const filtered = useMemo(() => certificates.filter((item) => (groupId === "all" || item.groupId === groupId) && (category === "Todos" || item.category === category) && `${item.title} ${item.description}`.toLowerCase().includes(search.toLowerCase())), [groupId, category, search]);
+  return <PortfolioShell title="Certificados" eyebrow="Arquivo profissional"><section className="mt-8 rounded-2xl border border-[#dbe3f0] bg-white p-3 shadow-sm"><div className="relative"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Pesquisar certificados…" className="h-10 w-full rounded-lg border border-[#dbe3f0] bg-[#f7f9fc] pl-10 text-sm" /></div><div className="mt-3 flex gap-2 overflow-x-auto pb-1"><button onClick={() => setGroupId("all")} className={`h-10 w-10 shrink-0 rounded-full border text-[9px] font-bold ${groupId === "all" ? "border-primary bg-primary text-white" : "border-[#dbe3f0] bg-white text-muted-foreground"}`}>ALL</button>{groups.map((group) => <button key={group.id} onClick={() => setGroupId(group.id)} title={group.name} aria-label={`Filtrar por ${group.name}`} className={`h-10 w-10 shrink-0 overflow-hidden rounded-full border p-0.5 ${groupId === group.id ? "border-primary ring-2 ring-primary/20" : "border-[#dbe3f0]"}`}><img src={group.image} alt={group.name} className="h-full w-full rounded-full object-cover" /></button>)}</div><div className="mt-3 flex flex-wrap gap-2">{categories.map((item) => <button key={item} onClick={() => setCategory(item)} className={`rounded-full px-3 py-1.5 text-[10px] font-semibold uppercase ${category === item ? "bg-[#17233e] text-white" : "bg-[#edf2fa] text-muted-foreground"}`}>{item}</button>)}</div></section><div className="mt-5 grid gap-4">{filtered.map((item) => <article key={item.id} className="overflow-hidden rounded-2xl border border-white/10 bg-[#203252] shadow-lg lg:grid lg:grid-cols-[220px_1fr]"><div className="min-h-[150px] bg-[#e8edfb]"><img src={item.image} alt={`Miniatura de ${item.title}`} className="h-full min-h-[150px] w-full object-cover" /></div><div className="p-4"><p className="text-[10px] font-semibold uppercase tracking-[.18em] text-primary">{item.category}</p><h2 className="display-font mt-2 text-lg leading-tight text-white">{item.title}</h2><p className="mt-2 text-xs leading-5 text-[#cdd7e8]">{item.description}</p><iframe title={`Visualizador de ${item.title}`} src={`${item.pdf}#toolbar=0&navpanes=0`} className="mt-4 h-[170px] w-full rounded-xl bg-white" /></div></article>)}</div><p className="mt-5 text-xs text-muted-foreground">{filtered.length} documentos apresentados</p></PortfolioShell>;
 }
 
 export function InstitutionsPage() {

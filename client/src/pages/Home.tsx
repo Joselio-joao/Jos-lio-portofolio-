@@ -1,16 +1,16 @@
 import { useMemo, useState } from "react";
 import { ArrowUpRight, Award, Building2, CalendarDays, FileText, FolderKanban, Hammer, Linkedin, Menu, Search, X } from "lucide-react";
 
-type Group = { id: string; name: string; description: string; image: string };
-type Certificate = { id: string; title: string; category: string; groupId: string; description: string; image: string; pdf: string };
+export type Group = { id: string; name: string; description: string; image: string };
+export type Certificate = { id: string; title: string; category: string; groupId: string; description: string; image: string; pdf: string };
 const LINKEDIN = "https://www.linkedin.com/in/josélio-joão-b02776424";
-const groups: Group[] = [
+export const groups: Group[] = [
   { id: "eiffel", name: "Eiffel", description: "Percurso escolar atual no Liceu nº 1002 BGO Eiffel–Dande.", image: "./assets/liceu-eiffel-dande.png" },
   { id: "uniathena", name: "UniAthena", description: "Transcripts de aprendizagem e realização académica.", image: "./assets/uniathena.png" },
   { id: "cambridge", name: "UniAthena + Cambridge International Qualifications", description: "Certificados desenvolvidos e entregues em parceria com a Cambridge International Qualifications, UK.", image: "./assets/ciq.jpg" },
   { id: "efset", name: "EF SET", description: "Certificação internacional de inglês — nível B1 Intermediate.", image: "./assets/ef-set.png" },
 ];
-const certificates: Certificate[] = [
+export const certificates: Certificate[] = [
   ["CR1561", "Basics of Oil & Gas - Economics (CR1561)", "Transcript", "uniathena", "Record of Learning and Achievement — UniAthena.", "./assets/uniathena.png", "./assets/CR1561.pdf"],
   ["CR1562", "Basics of Oil & Gas - Reserves, Risk & Value (CR1562)", "Transcript", "uniathena", "Record of Learning and Achievement — UniAthena.", "./assets/uniathena.png", "./assets/CR1562.pdf"],
   ["CR1573", "Basics of Oil & Gas - Finance & Accounting (CR1573)", "Transcript", "uniathena", "Record of Learning and Achievement — UniAthena.", "./assets/uniathena.png", "./assets/CR1573.pdf"],
