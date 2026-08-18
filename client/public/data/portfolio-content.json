@@ -1,5 +1,14 @@
 [
   {
+    "kind": "eventos",
+    "title": "Literacia financeira ",
+    "description": "Formação em Literacia Financeira, promovida pela Comissão Nacional de Angola para a UNESCO e patrocinada pelo Banco Millennium Atlântico, no âmbito da 5.ª Edição do Concurso Kandengue Escritor.",
+    "category": "Literacia ",
+    "id": "2f25dfa2-0735-463f-b9bd-1e1db099c795",
+    "image": "/Jos-lio-portofolio-/uploads/2f25dfa2-0735-463f-b9bd-1e1db099c795-image.jpg",
+    "updatedAt": 1787069960556
+  },
+  {
     "id": "teams-comunidade-projectos",
     "kind": "projectos",
     "title": "Comunidade Teams — Projectos",
