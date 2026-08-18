@@ -1,9 +1,10 @@
 import { useMemo, useState } from "react";
-import { Award, Building2, CalendarDays, FolderKanban, Hammer, Home, ArrowLeft, Search } from "lucide-react";
+import { Award, Building2, CalendarDays, FolderKanban, Hammer, Home, Search, Linkedin } from "lucide-react";
 import { certificates, groups } from "./Home";
 import { Link } from "wouter";
 
 const base = "/Jos-lio-portofolio-";
+const LINKEDIN = "https://www.linkedin.com/in/josélio-joão-b02776424";
 export const navItems = [
   { href: `${base}/`, label: "Perfil", icon: Home },
   { href: `${base}/projectos`, label: "Projectos", icon: FolderKanban },
@@ -15,7 +16,7 @@ export const navItems = [
 
 export function PortfolioShell({ title, eyebrow, children }: { title: string; eyebrow: string; children: React.ReactNode }) {
   return <div className="min-h-screen bg-[#f7f9fc] pb-24 text-[#17233e]">
-    <header className="sticky top-0 z-40 border-b border-white/10 bg-[#17233e]/95 backdrop-blur-xl"><div className="container flex h-16 items-center justify-between"><Link href={`${base}/`} className="flex items-center gap-3"><img src="./assets/logo.png" alt="Símbolo de Josélio João" className="h-10 w-10 rounded-full object-contain" /><span className="hidden text-sm font-semibold tracking-[.08em] text-white sm:block">JOSÉLIO <span className="text-primary">JOÃO</span></span></Link><Link href={`${base}/`} className="inline-flex items-center gap-2 text-xs font-semibold text-white"><ArrowLeft className="h-4 w-4" /> Perfil</Link></div></header>
+    <header className="sticky top-0 z-40 border-b border-white/10 bg-[#17233e]/95 backdrop-blur-xl"><div className="container flex h-16 items-center justify-between"><Link href={`${base}/`} aria-label="Abrir apresentação de Josélio João" className="flex items-center gap-3"><img src="./assets/logo.png" alt="Símbolo de Josélio João" className="h-10 w-10 rounded-full object-contain" /><span className="hidden text-sm font-semibold tracking-[.08em] text-white sm:block">JOSÉLIO <span className="text-primary">JOÃO</span></span></Link><a href={LINKEDIN} target="_blank" rel="noreferrer" aria-label="Abrir LinkedIn" className="rounded-full border border-white/10 p-2.5 text-white hover:border-primary hover:text-primary"><Linkedin className="h-4 w-4" /></a></div></header>
     <main className="container py-10 sm:py-14"><p className="text-xs font-semibold uppercase tracking-[.22em] text-primary">{eyebrow}</p><h1 className="display-font mt-3 text-4xl text-[#101a31] sm:text-5xl">{title}</h1>{children}</main>
     <BottomNav />
   </div>;
