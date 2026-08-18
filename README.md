@@ -14,6 +14,6 @@ pnpm test
 pnpm run build:external
 ```
 
-O build externo é criado em `dist/public`. O workflow `.github/workflows/deploy-pages.yml` publica automaticamente essa pasta no GitHub Pages após cada alteração na branch `main`.
+O build externo é criado em `dist/public`. Para a primeira publicação, abre **Settings → Pages** no repositório e escolhe **GitHub Actions** como Source. Depois disso, o workflow `.github/workflows/deploy-pages.yml` publica automaticamente essa pasta após cada alteração na branch `main`.
 
 A aplicação não depende de login obrigatório, Supabase, Firebase, API externa ou base de dados remota para as funções essenciais. Não devem ser adicionados ao repositório tokens, cookies, ficheiros `.env`, dumps de bases de dados ou credenciais.
