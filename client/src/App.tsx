@@ -8,17 +8,13 @@ import Home from "./pages/Home";
 
 
 function Router() {
-  const repositoryBase = "/Jos-lio-portofolio-";
-  const base = typeof window !== "undefined" && window.location.pathname.startsWith(repositoryBase)
-    ? repositoryBase
-    : "";
-
   return (
-    <WouterRouter base={base}>
+    <WouterRouter>
       <Switch>
-      <Route path={"/"} component={Home} />
-      <Route path={"/404"} component={NotFound} />
-      {/* Final fallback route */}
+        <Route path={"/"} component={Home} />
+        <Route path={"/Jos-lio-portofolio-"} component={Home} />
+        <Route path={"/Jos-lio-portofolio-/"} component={Home} />
+        <Route path={"/404"} component={NotFound} />
         <Route component={NotFound} />
       </Switch>
     </WouterRouter>
