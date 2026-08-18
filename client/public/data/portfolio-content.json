@@ -1,1 +1,10 @@
-[]
+[
+  {
+    "kind": "projectos",
+    "title": "github manager",
+    "description": "super gestor para o meu portofolio",
+    "category": "",
+    "id": "2fce1a65-b870-4542-add5-f5777f583a0b",
+    "updatedAt": 1787056109604
+  }
+]
