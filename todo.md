@@ -41,3 +41,10 @@
 - [x] Simplificar a exportação para PWA estática sem backend, login ou Supabase.
 - [x] Preparar a publicação externa da PWA e as instruções de domínio.
 - [x] Confirmar que IndexedDB, OPFS, Cache API e modo offline permanecem funcionais após a exportação.
+
+
+## Correção visual dos cartões de certificados
+
+- [x] Reduzir as imagens dos cartões de certificados para o tamanho médio usado na página Instituições
+- [x] Validar proporção, responsividade e ausência de cortes em mobile e desktop
+- [x] Publicar a correcção visual
