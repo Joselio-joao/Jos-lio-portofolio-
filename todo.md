@@ -97,4 +97,12 @@
 
 - [x] Diagnosticar o build falhado e o estado “No active routes”
 - [x] Corrigir ou confirmar build, saída e variáveis Supabase
-- [ ] Validar o deployment e as rotas no endereço `pages.dev`
+- [x] Validar o deployment e as rotas no endereço `pages.dev`
+
+
+## Login por código temporário enviado por e-mail
+
+- [x] Substituir palavra-passe por pedido de código OTP por e-mail
+- [x] Confirmar código, sessão e autorização em `portfolio_members`
+- [x] Validar mensagens, expiração, reenvio e rotas protegidas
+- [ ] Publicar a alteração no Cloudflare Pages
