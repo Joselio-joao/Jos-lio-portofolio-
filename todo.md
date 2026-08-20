@@ -48,3 +48,10 @@
 - [x] Reduzir as imagens dos cartões de certificados para o tamanho médio usado na página Instituições
 - [x] Validar proporção, responsividade e ausência de cortes em mobile e desktop
 - [x] Publicar a correcção visual
+
+
+## Compactação dos cartões de certificados
+
+- [x] Reduzir altura, espaçamento e área interna dos cartões de certificados
+- [x] Validar leitura, botões, pré-visualização e responsividade
+- [x] Publicar a versão compacta
