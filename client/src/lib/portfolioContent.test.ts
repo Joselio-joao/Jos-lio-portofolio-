@@ -45,9 +45,12 @@ describe("portfolio content", () => {
     vi.unstubAllGlobals();
   });
 
-  it("loads public content even when local cache is unavailable", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => [{ id: "public-1", kind: "projectos", title: "Projeto público", description: "Conteúdo", updatedAt: 1 }] }));
-    await expect(loadPortfolioContent()).resolves.toEqual([{ id: "public-1", kind: "projectos", title: "Projeto público", description: "Conteúdo", updatedAt: 1 }]);
+  it("loads public content before using local cache and adds a cache-busting version", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => [{ id: "public-latest", kind: "projectos", title: "Versão pública actual", description: "Conteúdo actualizado", updatedAt: 2 }] });
+    vi.stubGlobal("fetch", fetchMock);
+    await expect(loadPortfolioContent()).resolves.toEqual([{ id: "public-latest", kind: "projectos", title: "Versão pública actual", description: "Conteúdo actualizado", updatedAt: 2 }]);
+    expect(fetchMock.mock.calls[0][0]).toMatch(/portfolio-content\.json\?v=/);
+    expect(fetchMock.mock.calls[0][1]).toMatchObject({ cache: "no-store" });
     vi.unstubAllGlobals();
   });
 });

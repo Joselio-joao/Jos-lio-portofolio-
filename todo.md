@@ -62,3 +62,10 @@
 - [x] Comparar a Gestão actual com o workspace, diagnóstico e regras de segurança do prompt fornecido
 - [x] Implementar as melhorias de token, inventário, editor e geração de índice aplicáveis ao portefólio
 - [x] Validar CRUD, uploads, conflitos, responsividade e publicação no GitHub Pages
+
+
+## Link público permanente e actualizável
+
+- [x] Garantir que o link público abre sem autenticação em qualquer navegador
+- [x] Fazer o conteúdo público carregar primeiro a versão actual do GitHub Pages e usar cache apenas como fallback
+- [ ] Validar que futuras publicações aparecem no mesmo link após o workflow terminar

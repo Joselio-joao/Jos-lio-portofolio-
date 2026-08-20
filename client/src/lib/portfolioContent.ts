@@ -13,6 +13,10 @@ const BRANCH = "main";
 const CONTENT_PATH = "client/public/data/portfolio-content.json";
 const UPLOADS_DIRECTORY = "client/public/uploads";
 const PUBLIC_CONTENT_URL = "/Jos-lio-portofolio-/data/portfolio-content.json";
+
+function publicContentUrl(): string {
+  return `${PUBLIC_CONTENT_URL}?v=${Date.now()}`;
+}
 const PUBLIC_UPLOADS_URL = "/Jos-lio-portofolio-/uploads";
 const PORTFOLIO_CACHE_KEY = "portfolio-content-cache-v1";
 const MAX_ATTACHMENT_BYTES = 25 * 1024 * 1024;
@@ -60,26 +64,23 @@ export function normalizePortfolioItem(input: Pick<PortfolioItem, "kind" | "titl
   };
 }
 
-async function refreshPortfolioContent(): Promise<PortfolioItem[]> {
+async function refreshPortfolioContent(): Promise<PortfolioItem[] | null> {
   try {
-    const response = await fetch(PUBLIC_CONTENT_URL, { cache: "no-store" });
+    const response = await fetch(publicContentUrl(), { cache: "no-store", headers: { Accept: "application/json" } });
     if (!response.ok) throw new Error(`Conteúdos públicos indisponíveis (${response.status}).`);
     const payload: unknown = await response.json();
     const items = Array.isArray(payload) ? payload as PortfolioItem[] : [];
     await saveStoredData(PORTFOLIO_CACHE_KEY, items).catch(() => undefined);
     return items;
   } catch {
-    return [];
+    return null;
   }
 }
 
 export async function loadPortfolioContent(): Promise<PortfolioItem[]> {
-  const cached = await loadStoredData<PortfolioItem[] | null>(PORTFOLIO_CACHE_KEY, null);
-  if (cached) {
-    void refreshPortfolioContent();
-    return cached;
-  }
-  return refreshPortfolioContent();
+  const fresh = await refreshPortfolioContent();
+  if (fresh !== null) return fresh;
+  return (await loadStoredData<PortfolioItem[] | null>(PORTFOLIO_CACHE_KEY, null)) ?? [];
 }
 
 function encodeContent(value: string): string { return btoa(unescape(encodeURIComponent(value))); }
