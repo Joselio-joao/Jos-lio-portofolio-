@@ -68,4 +68,19 @@
 
 - [x] Garantir que o link público abre sem autenticação em qualquer navegador
 - [x] Fazer o conteúdo público carregar primeiro a versão actual do GitHub Pages e usar cache apenas como fallback
-- [ ] Validar que futuras publicações aparecem no mesmo link após o workflow terminar
+- [x] Validar que futuras publicações aparecem no mesmo link após o workflow terminar
+
+
+## Repositório privado
+
+- [x] Alterar `Joselio-joao/Jos-lio-portofolio-` para privado
+- [x] Confirmar a visibilidade e verificar o impacto no GitHub Pages
+
+
+
+## Migração para Supabase
+
+- [x] Configurar autenticação Supabase para utilizadores autorizados
+- [x] Migrar conteúdos e ficheiros privados para tabelas, Storage e políticas RLS
+- [x] Adaptar Gestão, leitura pública e testes ao Supabase
+- [ ] Validar acesso negado, sessão, uploads, publicação e build

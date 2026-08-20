@@ -45,12 +45,17 @@ describe("portfolio content", () => {
     vi.unstubAllGlobals();
   });
 
-  it("loads public content before using local cache and adds a cache-busting version", async () => {
-    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => [{ id: "public-latest", kind: "projectos", title: "Versão pública actual", description: "Conteúdo actualizado", updatedAt: 2 }] });
+  it("uses Supabase first and falls back to a versioned public file when unavailable", async () => {
+    const fetchMock = vi.fn().mockImplementation((input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("/rest/v1/portfolio_items")) return Promise.resolve({ ok: false, status: 503, json: async () => ({}) });
+      return Promise.resolve({ ok: true, json: async () => [{ id: "public-latest", kind: "projectos", title: "Versão pública actual", description: "Conteúdo actualizado", updatedAt: 2 }] });
+    });
     vi.stubGlobal("fetch", fetchMock);
     await expect(loadPortfolioContent()).resolves.toEqual([{ id: "public-latest", kind: "projectos", title: "Versão pública actual", description: "Conteúdo actualizado", updatedAt: 2 }]);
-    expect(fetchMock.mock.calls[0][0]).toMatch(/portfolio-content\.json\?v=/);
-    expect(fetchMock.mock.calls[0][1]).toMatchObject({ cache: "no-store" });
+    const publicCall = fetchMock.mock.calls.find(([input]) => String(input).includes("portfolio-content.json"));
+    expect(publicCall?.[0]).toMatch(/portfolio-content\.json\?v=/);
+    expect(publicCall?.[1]).toMatchObject({ cache: "no-store" });
     vi.unstubAllGlobals();
   });
 });

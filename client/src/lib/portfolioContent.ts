@@ -1,4 +1,5 @@
-import { loadStoredData, saveStoredData } from "./offlineStorage";
+import { saveStoredData, loadStoredData } from "./offlineStorage";
+import { supabase } from "./supabase";
 
 export type PortfolioKind = "projectos" | "eventos" | "obras" | "certificados" | "instituicoes";
 export type PortfolioAttachment = { url: string; name: string; mime: string; type: "office" | "video" };
@@ -77,7 +78,58 @@ async function refreshPortfolioContent(): Promise<PortfolioItem[] | null> {
   }
 }
 
+type SupabasePortfolioRow = {
+  id: string;
+  kind: PortfolioKind;
+  title: string;
+  description: string;
+  category: string | null;
+  group_id: string | null;
+  image_path: string | null;
+  pdf_path: string | null;
+  attachment_path: string | null;
+  external_url: string | null;
+  mime_type: string | null;
+  file_size: number | null;
+  updated_at: string;
+  order_index: number;
+};
+
+async function signedStorageUrl(path: string | null): Promise<string | undefined> {
+  if (!path) return undefined;
+  if (/^https?:\/\//i.test(path)) return path;
+  if (!supabase) return undefined;
+  const { data, error } = await supabase.storage.from("portfolio-private").createSignedUrl(path, 3600);
+  if (error) throw error;
+  return data.signedUrl;
+}
+
+function attachmentFromPath(path: string | null, mime: string | null): PortfolioAttachment | undefined {
+  if (!path) return undefined;
+  const name = path.split("/").pop() ?? path;
+  const type = mime?.startsWith("video/") ? "video" : "office";
+  return { url: "", name, mime: mime ?? "application/octet-stream", type };
+}
+
+async function rowToPortfolioItem(row: SupabasePortfolioRow): Promise<PortfolioItem> {
+  const [image, pdf, attachmentUrl] = await Promise.all([signedStorageUrl(row.image_path), signedStorageUrl(row.pdf_path), signedStorageUrl(row.attachment_path)]);
+  const attachment = attachmentFromPath(row.attachment_path, row.mime_type);
+  return { id: row.id, kind: row.kind, title: row.title, description: row.description, category: row.category ?? undefined, image, pdf, attachment: attachment ? { ...attachment, url: attachmentUrl ?? "" } : undefined, externalUrl: row.external_url ?? undefined, updatedAt: Date.parse(row.updated_at) || Date.now() };
+}
+
+async function refreshSupabasePortfolioContent(): Promise<PortfolioItem[] | null> {
+  if (!supabase) return null;
+  const { data, error } = await supabase.from("portfolio_items").select("*").eq("status", "published").order("order_index", { ascending: true }).order("updated_at", { ascending: false });
+  if (error) return null;
+  return Promise.all((data as SupabasePortfolioRow[]).map(rowToPortfolioItem));
+}
+
 export async function loadPortfolioContent(): Promise<PortfolioItem[]> {
+  const supabaseItems = await refreshSupabasePortfolioContent();
+  if (supabaseItems !== null) {
+    await saveStoredData(PORTFOLIO_CACHE_KEY, supabaseItems).catch(() => undefined);
+    return supabaseItems;
+  }
   const fresh = await refreshPortfolioContent();
   if (fresh !== null) return fresh;
   return (await loadStoredData<PortfolioItem[] | null>(PORTFOLIO_CACHE_KEY, null)) ?? [];
@@ -189,6 +241,49 @@ async function materializeAsset(value: string | undefined, itemId: string, kind:
   return publicUploadUrl(filename);
 }
 
+function storagePathFromUrl(value: string | undefined): string | null {
+  if (!value) return null;
+  const marker = "/storage/v1/object/sign/portfolio-private/";
+  const index = value.indexOf(marker);
+  if (index < 0) return null;
+  return decodeURIComponent(value.slice(index + marker.length).split("?")[0]);
+}
+
+async function uploadSupabaseDataUrl(value: string | undefined, path: string): Promise<string | null> {
+  if (!value || !supabase) return null;
+  const asset = getDataUrlAsset(value);
+  if (!asset) return storagePathFromUrl(value);
+  const binary = Uint8Array.from(atob(asset.content), (character) => character.charCodeAt(0));
+  const { error } = await supabase.storage.from("portfolio-private").upload(path, binary, { contentType: asset.mime, upsert: true });
+  if (error) throw error;
+  return path;
+}
+
+async function saveSupabasePortfolioContent(items: PortfolioItem[]): Promise<PortfolioItem[]> {
+  if (!supabase) throw new Error("O Supabase não está configurado.");
+  const rows = [];
+  for (const item of items) {
+    const imagePath = await uploadSupabaseDataUrl(item.image, `items/${item.id}/image.${getDataUrlAsset(item.image ?? "")?.extension ?? "bin"}`);
+    const pdfPath = await uploadSupabaseDataUrl(item.pdf, `items/${item.id}/pdf.pdf`);
+    const attachmentAsset = getDataUrlAsset(item.attachment?.url ?? "");
+    const attachmentPath = await uploadSupabaseDataUrl(item.attachment?.url, `items/${item.id}/attachment.${attachmentAsset?.extension ?? "bin"}`);
+    rows.push({ id: item.id, kind: item.kind, title: item.title.trim(), description: item.description.trim(), category: item.category ?? null, group_id: null, image_path: imagePath, pdf_path: pdfPath, attachment_path: attachmentPath, external_url: validateExternalUrl(item.externalUrl) ?? null, mime_type: item.attachment?.mime ?? null, file_size: null, status: "published", order_index: 0, updated_at: new Date(item.updatedAt).toISOString() });
+  }
+  const { data, error } = await supabase.from("portfolio_items").upsert(rows, { onConflict: "id" }).select("*");
+  if (error) throw error;
+  const keepIds = new Set(items.map((item) => item.id));
+  const { data: existingRows, error: existingError } = await supabase.from("portfolio_items").select("id");
+  if (existingError) throw existingError;
+  const removedIds = (existingRows as Array<{ id: string }>).map((row) => row.id).filter((id) => !keepIds.has(id));
+  if (removedIds.length) {
+    const { error: removeError } = await supabase.from("portfolio_items").delete().in("id", removedIds);
+    if (removeError) throw removeError;
+  }
+  const published = await Promise.all((data as SupabasePortfolioRow[]).map(rowToPortfolioItem));
+  await saveStoredData(PORTFOLIO_CACHE_KEY, published).catch(() => undefined);
+  return published;
+}
+
 async function materializeAttachment(value: PortfolioAttachment | undefined, itemId: string, token: string): Promise<PortfolioAttachment | undefined> {
   if (!value) return undefined;
   const asset = getDataUrlAsset(value.url);
@@ -198,8 +293,12 @@ async function materializeAttachment(value: PortfolioAttachment | undefined, ite
   return { url: publicUploadUrl(filename), name: value.name, mime: asset.mime, type: asset.type };
 }
 
-export async function savePortfolioContent(items: PortfolioItem[], token: string): Promise<PortfolioItem[]> {
-  if (!token.trim()) throw new Error("Introduza um token do GitHub para publicar as alterações.");
+export async function savePortfolioContent(items: PortfolioItem[], token = ""): Promise<PortfolioItem[]> {
+  if (supabase) {
+    const { data } = await supabase.auth.getSession();
+    if (data.session) return saveSupabasePortfolioContent(items);
+  }
+  if (!token.trim()) throw new Error("Inicie sessão no Supabase ou introduza um token do GitHub para publicar as alterações.");
   const publishedItems: PortfolioItem[] = [];
   for (const item of items) {
     publishedItems.push({ ...item, image: await materializeAsset(item.image, item.id, "image", token), pdf: await materializeAsset(item.pdf, item.id, "pdf", token), attachment: await materializeAttachment(item.attachment, item.id, token), externalUrl: validateExternalUrl(item.externalUrl) });
@@ -212,6 +311,15 @@ export async function savePortfolioContent(items: PortfolioItem[], token: string
 export function readFileAsDataUrl(file: File): Promise<string> {
   if (file.size > MAX_ATTACHMENT_BYTES) return Promise.reject(new Error("Cada anexo deve ter no máximo 25 MB para publicação no GitHub."));
   return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(String(reader.result)); reader.onerror = () => reject(reader.error ?? new Error("Não foi possível ler o ficheiro.")); reader.readAsDataURL(file); });
+}
+
+export async function importLegacyPortfolioContent(): Promise<PortfolioItem[]> {
+  if (!supabase) throw new Error("O Supabase não está configurado.");
+  const response = await fetch("/Jos-lio-portofolio-/data/portfolio-content.json", { cache: "no-store" });
+  if (!response.ok) throw new Error("Não foi possível ler o conteúdo histórico para migração.");
+  const payload = await response.json() as unknown;
+  if (!Array.isArray(payload)) throw new Error("O conteúdo histórico não tem um formato válido.");
+  return saveSupabasePortfolioContent(payload as PortfolioItem[]);
 }
 
 export function exportPortfolioContent(items: PortfolioItem[]): void {

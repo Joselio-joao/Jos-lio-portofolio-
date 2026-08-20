@@ -8,6 +8,9 @@ import Home from "./pages/Home";
 import { CertificatesPage, InstitutionsPage, PlaceholderPage } from "./pages/PortfolioSections";
 import { CalendarDays, FolderKanban, Hammer } from "lucide-react";
 import PortfolioAdmin from "./pages/PortfolioAdmin";
+import PortfolioAccessGate from "./components/PortfolioAccessGate";
+import SupabaseLogin from "./pages/SupabaseLogin";
+import { SupabaseAuthProvider } from "./contexts/SupabaseAuthContext";
 
 
 function Router() {
@@ -41,6 +44,10 @@ function Router() {
 //   to keep consistent foreground/background color across components
 // - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
 
+function PrivateRouter() {
+  return <PortfolioAccessGate><Router /></PortfolioAccessGate>;
+}
+
 function App() {
   return (
     <ErrorBoundary>
@@ -50,7 +57,15 @@ function App() {
       >
         <TooltipProvider>
           <Toaster />
-          <Router />
+          <SupabaseAuthProvider>
+            <WouterRouter>
+              <Switch>
+                <Route path={"/login"} component={SupabaseLogin} />
+                <Route path={"/Jos-lio-portofolio-/login"} component={SupabaseLogin} />
+                <Route component={PrivateRouter} />
+              </Switch>
+            </WouterRouter>
+          </SupabaseAuthProvider>
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>
