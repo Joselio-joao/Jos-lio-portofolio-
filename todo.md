@@ -91,3 +91,10 @@
 - [ ] Recolher e corrigir o erro do último build no Cloudflare Pages
 - [ ] Validar comando, saída e variáveis Supabase do deployment
 - [ ] Confirmar que o endereço `pages.dev` fica activo e protegido pelo login
+
+
+## Erro Cloudflare Pages — nova verificação
+
+- [x] Diagnosticar o build falhado e o estado “No active routes”
+- [x] Corrigir ou confirmar build, saída e variáveis Supabase
+- [ ] Validar o deployment e as rotas no endereço `pages.dev`
