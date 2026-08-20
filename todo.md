@@ -106,3 +106,11 @@
 - [x] Confirmar código, sessão e autorização em `portfolio_members`
 - [x] Validar mensagens, expiração, reenvio e rotas protegidas
 - [ ] Publicar a alteração no Cloudflare Pages
+
+
+## Restaurar login por e-mail e palavra-passe
+
+- [x] Substituir o fluxo OTP pelo login Supabase com e-mail e palavra-passe
+- [x] Remover o estado e as mensagens específicas de código temporário
+- [x] Validar sessão, autorização, testes e build
+- [ ] Publicar a versão correcta no Cloudflare Pages
