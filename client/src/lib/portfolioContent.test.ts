@@ -18,7 +18,7 @@ describe("portfolio content", () => {
   });
 
   it("builds a public GitHub Pages URL for an uploaded file", () => {
-    expect(publicUploadUrl("projecto-imagem.png")).toBe("/Jos-lio-portofolio-/uploads/projecto-imagem.png");
+    expect(publicUploadUrl("projecto-imagem.png")).toBe("/uploads/projecto-imagem.png");
   });
 
   it("keeps only safe HTTP(S) external links", () => {

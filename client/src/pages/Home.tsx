@@ -2,7 +2,7 @@ import { ArrowUpRight, Award, Building2, CalendarDays, FolderKanban, Hammer, Lin
 import { Link, useLocation } from "wouter";
 
 const LINKEDIN = "https://www.linkedin.com/in/josélio-joão-b02776424";
-const BASE = "/Jos-lio-portofolio-";
+const BASE = "";
 
 const navItems = [
   { href: `${BASE}/`, label: "Perfil", icon: UserRound },

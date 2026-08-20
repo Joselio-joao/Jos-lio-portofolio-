@@ -84,3 +84,10 @@
 - [x] Migrar conteúdos e ficheiros privados para tabelas, Storage e políticas RLS
 - [x] Adaptar Gestão, leitura pública e testes ao Supabase
 - [ ] Validar acesso negado, sessão, uploads, publicação e build
+
+
+## Correção do build Cloudflare Pages
+
+- [ ] Recolher e corrigir o erro do último build no Cloudflare Pages
+- [ ] Validar comando, saída e variáveis Supabase do deployment
+- [ ] Confirmar que o endereço `pages.dev` fica activo e protegido pelo login

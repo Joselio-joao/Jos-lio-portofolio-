@@ -13,12 +13,12 @@ const REPOSITORY = "Joselio-joao/Jos-lio-portofolio-";
 const BRANCH = "main";
 const CONTENT_PATH = "client/public/data/portfolio-content.json";
 const UPLOADS_DIRECTORY = "client/public/uploads";
-const PUBLIC_CONTENT_URL = "/Jos-lio-portofolio-/data/portfolio-content.json";
+const PUBLIC_CONTENT_URL = `${import.meta.env.BASE_URL}data/portfolio-content.json`;
 
 function publicContentUrl(): string {
   return `${PUBLIC_CONTENT_URL}?v=${Date.now()}`;
 }
-const PUBLIC_UPLOADS_URL = "/Jos-lio-portofolio-/uploads";
+const PUBLIC_UPLOADS_URL = `${import.meta.env.BASE_URL}uploads`;
 const PORTFOLIO_CACHE_KEY = "portfolio-content-cache-v1";
 const MAX_ATTACHMENT_BYTES = 25 * 1024 * 1024;
 const BLOCKED_PATH_PARTS = ["..", ".git", ".env", "credentials", "secrets"];
@@ -315,7 +315,7 @@ export function readFileAsDataUrl(file: File): Promise<string> {
 
 export async function importLegacyPortfolioContent(): Promise<PortfolioItem[]> {
   if (!supabase) throw new Error("O Supabase não está configurado.");
-  const response = await fetch("/Jos-lio-portofolio-/data/portfolio-content.json", { cache: "no-store" });
+  const response = await fetch(PUBLIC_CONTENT_URL, { cache: "no-store" });
   if (!response.ok) throw new Error("Não foi possível ler o conteúdo histórico para migração.");
   const payload = await response.json() as unknown;
   if (!Array.isArray(payload)) throw new Error("O conteúdo histórico não tem um formato válido.");

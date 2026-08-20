@@ -4,9 +4,9 @@ import { certificates, groups } from "./portfolioData";
 import { loadPortfolioContent, type PortfolioItem } from "../lib/portfolioContent";
 import { Link, useLocation } from "wouter";
 
-const base = "/Jos-lio-portofolio-";
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 const LINKEDIN = "https://www.linkedin.com/in/josélio-joão-b02776424";
-const customCertificateImage = (item: PortfolioItem) => item.image || (item.category === "EF SET" ? "/Jos-lio-portofolio-/assets/ef-set.png" : item.category === "UniAthena" ? "/Jos-lio-portofolio-/assets/uniathena.png" : "/Jos-lio-portofolio-/assets/ciq.jpg");
+const customCertificateImage = (item: PortfolioItem) => item.image || (item.category === "EF SET" ? `${base}/assets/ef-set.png` : item.category === "UniAthena" ? `${base}/assets/uniathena.png` : `${base}/assets/ciq.jpg`);
 
 function AttachmentCard({ attachment }: { attachment?: PortfolioItem["attachment"] }) {
   if (!attachment) return null;
@@ -28,7 +28,7 @@ export function PortfolioShell({ title, eyebrow, children }: { title: string; ey
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   }, [location]);
   return <div className="min-h-screen bg-[#f7f9fc] pb-24 text-[#17233e]">
-    <header className="sticky top-0 z-40 border-b border-white/10 bg-[#17233e]/95 backdrop-blur-xl"><div className="container flex h-16 items-center justify-between"><div className="flex items-center gap-3"><img src="/Jos-lio-portofolio-/assets/logo.png" alt="Símbolo de Josélio João" className="h-10 w-10 rounded-full object-contain" /><span className="hidden text-sm font-semibold tracking-[.08em] text-white sm:block">JOSÉLIO <span className="text-primary">JOÃO</span></span></div><a href={LINKEDIN} target="_blank" rel="noreferrer" aria-label="Abrir LinkedIn" className="rounded-full border border-white/10 p-2.5 text-white hover:border-primary hover:text-primary"><Linkedin className="h-4 w-4" /></a></div></header>
+    <header className="sticky top-0 z-40 border-b border-white/10 bg-[#17233e]/95 backdrop-blur-xl"><div className="container flex h-16 items-center justify-between"><div className="flex items-center gap-3"><img src={`${base}/assets/logo.png`} alt="Símbolo de Josélio João" className="h-10 w-10 rounded-full object-contain" /><span className="hidden text-sm font-semibold tracking-[.08em] text-white sm:block">JOSÉLIO <span className="text-primary">JOÃO</span></span></div><a href={LINKEDIN} target="_blank" rel="noreferrer" aria-label="Abrir LinkedIn" className="rounded-full border border-white/10 p-2.5 text-white hover:border-primary hover:text-primary"><Linkedin className="h-4 w-4" /></a></div></header>
     <main className="container py-10 sm:py-14"><p className="text-xs font-semibold uppercase tracking-[.22em] text-primary">{eyebrow}</p><h1 className="display-font mt-3 text-4xl text-[#101a31] sm:text-5xl">{title}</h1>{children}</main>
     <BottomNav />
   </div>;
@@ -69,6 +69,6 @@ export function CertificatesPage() {
 export function InstitutionsPage() {
   const [customItems, setCustomItems] = useState<PortfolioItem[]>([]);
   useEffect(() => { loadPortfolioContent().then((stored) => setCustomItems(stored.filter((item) => item.kind === "instituicoes"))).catch(() => setCustomItems([])); }, []);
-  const allGroups = [...groups.map((group) => ({ ...group, externalUrl: undefined })), ...customItems.map((item) => ({ id: item.id, name: item.title, description: item.description, image: item.image || "/Jos-lio-portofolio-/assets/ciq.jpg", externalUrl: item.externalUrl }))];
+  const allGroups = [...groups.map((group) => ({ ...group, externalUrl: undefined })), ...customItems.map((item) => ({ id: item.id, name: item.title, description: item.description, image: item.image || `${base}/assets/ciq.jpg`, externalUrl: item.externalUrl }))];
   return <PortfolioShell title="Instituições" eyebrow="Percurso académico"><div className="mt-8 grid gap-3 sm:grid-cols-2">{allGroups.map((group) => <article key={group.id} className="flex items-center gap-4 rounded-2xl border border-[#dbe3f0] bg-white p-4 shadow-sm"><img src={group.image} alt={group.name} className="h-16 w-16 rounded-xl bg-[#f7f9fc] object-contain" /><div><h2 className="font-semibold text-[#17233e]">{group.name}</h2><p className="mt-1 text-xs leading-5 text-muted-foreground">{group.description}</p>{group.externalUrl && <a href={group.externalUrl} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline">Abrir ligação <ExternalLink className="h-3.5 w-3.5" /></a>}</div></article>)}</div></PortfolioShell>;
 }
