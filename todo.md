@@ -55,3 +55,10 @@
 - [x] Reduzir altura, espaçamento e área interna dos cartões de certificados
 - [x] Validar leitura, botões, pré-visualização e responsividade
 - [x] Publicar a versão compacta
+
+
+## Adaptação da área de Gestão ao prompt GitHub Pages/API
+
+- [x] Comparar a Gestão actual com o workspace, diagnóstico e regras de segurança do prompt fornecido
+- [x] Implementar as melhorias de token, inventário, editor e geração de índice aplicáveis ao portefólio
+- [x] Validar CRUD, uploads, conflitos, responsividade e publicação no GitHub Pages

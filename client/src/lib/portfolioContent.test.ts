@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { getDataUrlAsset, loadPortfolioContent, normalizePortfolioItem, publicUploadUrl, validateExternalUrl } from "./portfolioContent";
+import { getDataUrlAsset, listGitHubFiles, loadPortfolioContent, normalizePortfolioItem, publicUploadUrl, readGitHubTextFile, validateExternalUrl, verifyGitHubAccess } from "./portfolioContent";
 
 describe("portfolio content", () => {
   it("normalizes required fields and optional metadata", () => {
@@ -24,6 +24,25 @@ describe("portfolio content", () => {
   it("keeps only safe HTTP(S) external links", () => {
     expect(validateExternalUrl("https://example.org/documento")).toBe("https://example.org/documento");
     expect(() => validateExternalUrl("javascript:alert(1)")).toThrow("A ligação externa deve começar");
+  });
+
+  it("validates the configured repository and branch before enabling publication", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockImplementation((url: string) => {
+      if (url.endsWith("/branches/main")) return Promise.resolve({ ok: true, json: async () => ({ name: "main" }) });
+      return Promise.resolve({ ok: true, json: async () => ({ full_name: "Joselio-joao/Jos-lio-portofolio-", permissions: { push: true } }) });
+    }));
+    await expect(verifyGitHubAccess("github_pat_EXEMPLO")).resolves.toMatchObject({ repository: "Joselio-joao/Jos-lio-portofolio-", branch: "main", canWrite: true });
+    vi.unstubAllGlobals();
+  });
+
+  it("lists repository files and reads a text file with its remote SHA", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockImplementation((url: string) => {
+      if (url.includes("contents/client/public/data/portfolio-content.json")) return Promise.resolve({ ok: true, json: async () => ({ sha: "sha-1", size: 12, encoding: "base64", content: "W10=" }) });
+      return Promise.resolve({ ok: true, json: async () => [{ name: "data", path: "client/public/data", sha: "sha-dir", size: 0, type: "dir", html_url: "https://github.com/example/data" }] });
+    }));
+    await expect(listGitHubFiles("github_pat_EXEMPLO", "client/public")).resolves.toMatchObject([{ path: "client/public/data", type: "dir" }]);
+    await expect(readGitHubTextFile("github_pat_EXEMPLO", "client/public/data/portfolio-content.json")).resolves.toMatchObject({ sha: "sha-1", content: "[]" });
+    vi.unstubAllGlobals();
   });
 
   it("loads public content even when local cache is unavailable", async () => {
