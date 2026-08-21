@@ -113,4 +113,45 @@
 - [x] Substituir o fluxo OTP pelo login Supabase com e-mail e palavra-passe
 - [x] Remover o estado e as mensagens específicas de código temporário
 - [x] Validar sessão, autorização, testes e build
-- [ ] Publicar a versão correcta no Cloudflare Pages
+- [x] Publicar a versão correcta no Cloudflare Pages
+
+
+## Palavra-passe única e registo de acessos
+
+- [ ] Criar validação protegida da palavra-passe sem a expor no frontend
+- [ ] Criar sessão temporária e expiração automática
+- [ ] Registar data e hora de cada acesso autorizado
+- [ ] Adaptar login e Gestão para mostrar o histórico ao proprietário
+- [ ] Validar segurança, testes, build e publicação
+
+
+## Proxy completo por palavra-passe única
+
+- [ ] Migrar leitura pública de conteúdos para a Edge Function protegida
+- [ ] Migrar uploads, downloads e CRUD da Gestão para o proxy
+- [ ] Substituir a guarda Supabase Auth por sessão temporária do proxy
+- [ ] Mostrar ao proprietário o histórico privado de acessos
+- [ ] Testar expiração, rejeição, publicação e acesso a ficheiros
+- [ ] Configurar e publicar a Edge Function no Supabase
+
+
+## Proprietário e palavras-passe de visitante de utilização única
+
+- [ ] Manter login do proprietário com e-mail e palavra-passe
+- [ ] Permitir que apenas o proprietário gere palavras-passe de visitante
+- [ ] Criar palavras-passe de visitante armazenadas apenas como hash
+- [ ] Invalidar atomicamente cada palavra-passe depois do primeiro uso
+- [ ] Mostrar na Gestão estado, criação, utilização e expiração das palavras-passe
+- [ ] Validar permissões, reutilização, expiração e publicação
+
+## Implementação final — autenticação dual e palavras-passe de visitante
+
+- [x] Separar o login de proprietário (e-mail/palavra-passe) do login de visitante (palavra-passe de utilização única)
+- [x] Validar a sessão de visitante no proxy com token assinado e expiração automática
+- [x] Implementar consumo atómico da palavra-passe através de consume_visitor_password
+- [x] Implementar geração, listagem, revogação e auditoria de palavras-passe na Gestão do proprietário
+- [x] Restringir a área de Gestão ao proprietário autenticado
+- [x] Validar TypeScript, 17 testes Vitest e build externo
+- [ ] Confirmar no Supabase os secrets e executar o SQL de palavras-passe, se ainda não tiver sido aplicado
+- [ ] Fazer teste manual end-to-end com uma palavra-passe real no deployment
+- [ ] Actualizar PASSWORD_PROXY_SETUP.md com a configuração dual e single-use
