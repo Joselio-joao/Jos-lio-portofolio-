@@ -202,3 +202,11 @@
 - [ ] Garantir que o alias `/Jos-lio-portofolio-/gestao` também abre a aplicação
 - [ ] Validar o redireccionamento para login sem sessão
 - [ ] Validar a abertura da Gestão depois do login do proprietário
+
+## Rotas resolvidas; ficheiros multimédia ainda ausentes
+
+- [x] Confirmar que a Gestão e as restantes rotas já carregam
+- [ ] Confirmar se os caminhos de imagens/PDFs apontam para Storage privado ou para referências antigas
+- [ ] Corrigir a emissão de URLs assinados para os ficheiros existentes
+- [ ] Migrar os ficheiros históricos que ainda não estão no bucket privado
+- [ ] Validar imagens, PDFs, Office e vídeos após login

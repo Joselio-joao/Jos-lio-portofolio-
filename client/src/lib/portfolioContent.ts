@@ -1,5 +1,6 @@
 import { saveStoredData, loadStoredData } from "./offlineStorage";
 import { supabase } from "./supabase";
+import { hasPortfolioProxySession, loadProxyPortfolioContent, saveProxyPortfolioContent } from "./portfolioProxy";
 
 export type PortfolioKind = "projectos" | "eventos" | "obras" | "certificados" | "instituicoes";
 export type PortfolioAttachment = { url: string; name: string; mime: string; type: "office" | "video" };
@@ -97,7 +98,7 @@ type SupabasePortfolioRow = {
 
 async function signedStorageUrl(path: string | null): Promise<string | undefined> {
   if (!path) return undefined;
-  if (/^https?:\/\//i.test(path)) return path;
+  if (/^(https?:\/\/|data:|\/)/i.test(path)) return path;
   if (!supabase) return undefined;
   const { data, error } = await supabase.storage.from("portfolio-private").createSignedUrl(path, 3600);
   if (error) throw error;
@@ -125,6 +126,15 @@ async function refreshSupabasePortfolioContent(): Promise<PortfolioItem[] | null
 }
 
 export async function loadPortfolioContent(): Promise<PortfolioItem[]> {
+  if (hasPortfolioProxySession()) {
+    try {
+      const proxyItems = await loadProxyPortfolioContent();
+      await saveStoredData(PORTFOLIO_CACHE_KEY, proxyItems).catch(() => undefined);
+      return proxyItems;
+    } catch {
+      return (await loadStoredData<PortfolioItem[] | null>(PORTFOLIO_CACHE_KEY, null)) ?? [];
+    }
+  }
   const supabaseItems = await refreshSupabasePortfolioContent();
   if (supabaseItems !== null) {
     await saveStoredData(PORTFOLIO_CACHE_KEY, supabaseItems).catch(() => undefined);
@@ -294,6 +304,9 @@ async function materializeAttachment(value: PortfolioAttachment | undefined, ite
 }
 
 export async function savePortfolioContent(items: PortfolioItem[], token = ""): Promise<PortfolioItem[]> {
+  if (hasPortfolioProxySession()) {
+    return saveProxyPortfolioContent(items);
+  }
   if (supabase) {
     const { data } = await supabase.auth.getSession();
     if (data.session) return saveSupabasePortfolioContent(items);

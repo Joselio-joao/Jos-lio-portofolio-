@@ -10,6 +10,12 @@ describe("portfolio content", () => {
     expect(item.id).toBeTypeOf("string");
   });
 
+  it("preserves historical relative and external asset references", () => {
+    const item = normalizePortfolioItem({ kind: "certificados", title: "Certificado", description: "Documento", image: "/uploads/certificado.png", pdf: "https://example.org/certificado.pdf" });
+    expect(item.image).toBe("/uploads/certificado.png");
+    expect(item.pdf).toBe("https://example.org/certificado.pdf");
+  });
+
   it("converts a supported data URL into file content and an extension", () => {
     expect(getDataUrlAsset("data:application/pdf;base64,QUJD")).toEqual({ content: "QUJD", extension: "pdf", mime: "application/pdf" });
     expect(getDataUrlAsset("data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,QUJD")).toMatchObject({ extension: "docx", mime: "application/vnd.openxmlformats-officedocument.wordprocessingml.document", type: "office" });
