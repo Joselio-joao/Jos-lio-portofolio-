@@ -216,3 +216,23 @@
 - [ ] Orientar publicação da Edge Function pelo painel web acessível no telemóvel
 - [ ] Confirmar configuração do Storage privado pelo Supabase mobile web
 - [ ] Testar imagens e documentos novamente no iPhone
+
+## 404 persistente no endereço do iPhone
+
+- [ ] Confirmar o domínio completo visível no link aberto pelo iPhone
+- [ ] Comparar o domínio com `jos-lio-portofolio.pages.dev`
+- [ ] Corrigir eventual domínio antigo ou deployment divergente
+- [ ] Validar novamente a Gestão e os documentos no endereço correcto
+
+## URL corrigido
+
+- [x] Identificar `%60` como carácter extra no endereço do iPhone
+- [ ] Confirmar a página inicial sem o carácter extra
+- [ ] Confirmar `/gestao` sem o carácter extra
+
+## Itens históricos devem aparecer no site
+
+- [ ] Mostrar os itens históricos após login válido
+- [ ] Garantir que certificados e PDFs aparecem na página Certificados
+- [ ] Garantir que imagens e ligações aparecem nas páginas correspondentes
+- [ ] Confirmar que o carregamento continua protegido por autenticação

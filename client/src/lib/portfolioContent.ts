@@ -150,6 +150,8 @@ export async function loadPortfolioContent(): Promise<PortfolioItem[]> {
       await saveStoredData(PORTFOLIO_CACHE_KEY, mergedItems).catch(() => undefined);
       return mergedItems;
     } catch {
+      const legacyItems = await refreshPortfolioContent();
+      if (legacyItems && legacyItems.length > 0) return legacyItems;
       return (await loadStoredData<PortfolioItem[] | null>(PORTFOLIO_CACHE_KEY, null)) ?? [];
     }
   }
