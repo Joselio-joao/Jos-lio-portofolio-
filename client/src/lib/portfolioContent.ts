@@ -19,6 +19,22 @@ const PUBLIC_CONTENT_URL = `${import.meta.env.BASE_URL}data/portfolio-content.js
 function publicContentUrl(): string {
   return `${PUBLIC_CONTENT_URL}?v=${Date.now()}`;
 }
+
+function normalizeLegacyAssetUrl(value: string | undefined): string | undefined {
+  if (!value || /^(https?:\/\/|data:)/i.test(value)) return value;
+  const withoutRepositoryPrefix = value.replace(/^\/Jos-lio-portofolio-\//, "/");
+  return withoutRepositoryPrefix;
+}
+
+function mergeLegacyAssets(items: PortfolioItem[], legacy: PortfolioItem[]): PortfolioItem[] {
+  const byId = new Map(legacy.map((item) => [item.id, item]));
+  const byTitle = new Map(legacy.map((item) => [item.title.trim().toLowerCase(), item]));
+  return items.map((item) => {
+    const fallback = byId.get(item.id) ?? byTitle.get(item.title.trim().toLowerCase());
+    if (!fallback) return item;
+    return { ...item, image: item.image || fallback.image, pdf: item.pdf || fallback.pdf, attachment: item.attachment?.url ? item.attachment : fallback.attachment, externalUrl: item.externalUrl || fallback.externalUrl };
+  });
+}
 const PUBLIC_UPLOADS_URL = `${import.meta.env.BASE_URL}uploads`;
 const PORTFOLIO_CACHE_KEY = "portfolio-content-cache-v1";
 const MAX_ATTACHMENT_BYTES = 25 * 1024 * 1024;
@@ -71,7 +87,7 @@ async function refreshPortfolioContent(): Promise<PortfolioItem[] | null> {
     const response = await fetch(publicContentUrl(), { cache: "no-store", headers: { Accept: "application/json" } });
     if (!response.ok) throw new Error(`Conteúdos públicos indisponíveis (${response.status}).`);
     const payload: unknown = await response.json();
-    const items = Array.isArray(payload) ? payload as PortfolioItem[] : [];
+    const items = Array.isArray(payload) ? (payload as PortfolioItem[]).map((item) => ({ ...item, image: normalizeLegacyAssetUrl(item.image), pdf: normalizeLegacyAssetUrl(item.pdf), attachment: item.attachment ? { ...item.attachment, url: normalizeLegacyAssetUrl(item.attachment.url) ?? item.attachment.url } : undefined })) : [];
     await saveStoredData(PORTFOLIO_CACHE_KEY, items).catch(() => undefined);
     return items;
   } catch {
@@ -129,8 +145,10 @@ export async function loadPortfolioContent(): Promise<PortfolioItem[]> {
   if (hasPortfolioProxySession()) {
     try {
       const proxyItems = await loadProxyPortfolioContent();
-      await saveStoredData(PORTFOLIO_CACHE_KEY, proxyItems).catch(() => undefined);
-      return proxyItems;
+      const legacyItems = await refreshPortfolioContent();
+      const mergedItems = legacyItems && legacyItems.length > 0 ? (proxyItems.length > 0 ? mergeLegacyAssets(proxyItems, legacyItems) : legacyItems) : proxyItems;
+      await saveStoredData(PORTFOLIO_CACHE_KEY, mergedItems).catch(() => undefined);
+      return mergedItems;
     } catch {
       return (await loadStoredData<PortfolioItem[] | null>(PORTFOLIO_CACHE_KEY, null)) ?? [];
     }

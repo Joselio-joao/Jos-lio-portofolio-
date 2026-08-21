@@ -210,3 +210,9 @@
 - [ ] Corrigir a emissão de URLs assinados para os ficheiros existentes
 - [ ] Migrar os ficheiros históricos que ainda não estão no bucket privado
 - [ ] Validar imagens, PDFs, Office e vídeos após login
+
+## Activação sem computador
+
+- [ ] Orientar publicação da Edge Function pelo painel web acessível no telemóvel
+- [ ] Confirmar configuração do Storage privado pelo Supabase mobile web
+- [ ] Testar imagens e documentos novamente no iPhone
