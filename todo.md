@@ -155,3 +155,50 @@
 - [ ] Confirmar no Supabase os secrets e executar o SQL de palavras-passe, se ainda não tiver sido aplicado
 - [ ] Fazer teste manual end-to-end com uma palavra-passe real no deployment
 - [ ] Actualizar PASSWORD_PROXY_SETUP.md com a configuração dual e single-use
+
+## Correcção do esquema portfolio_members
+
+- [ ] Confirmar as colunas reais de `portfolio_members` no Supabase
+- [ ] Corrigir o SQL de associação do proprietário sem usar a coluna `email`
+- [ ] Actualizar a documentação para o esquema real
+- [ ] Validar o login do proprietário e o acesso à Gestão
+
+## Diagnóstico adicional do proprietário Supabase
+
+- [ ] Confirmar se o e-mail criado em Auth corresponde exactamente ao e-mail consultado
+- [x] Confirmar se existe uma linha correspondente em `portfolio_members`
+- [x] Confirmar se a linha tem `role = 'owner'`
+- [ ] Corrigir a autorização caso o registo exista mas a Gestão continue bloqueada
+
+- [x] Confirmar pela consulta que `estudantejoselio@gmail.com` existe em `auth.users`
+- [x] Criar ou actualizar a linha correspondente em `portfolio_members` com `role = 'owner'`
+
+## Link publicado mostra sempre acesso não autorizado
+
+- [ ] Garantir que o link abre primeiro o ecrã de login quando não existe sessão
+- [ ] Corrigir a leitura assíncrona da sessão Supabase antes de decidir autorização
+- [ ] Reconhecer correctamente o proprietário após novo login
+- [ ] Validar o comportamento no link publicado em navegador limpo
+
+## 404 público e documentos ausentes
+
+- [ ] Confirmar o domínio exacto e a origem do 404 apresentado no iPhone
+- [ ] Garantir fallback para rotas directas e links antigos
+- [ ] Confirmar a fonte actual dos documentos e imagens publicados
+- [ ] Restaurar os conteúdos históricos no Supabase ou activar fallback seguro
+- [ ] Validar certificados, instituições, imagens e PDFs no link público
+
+## Ficheiros continuam ausentes no link público
+
+- [ ] Confirmar se `portfolio_items` contém os conteúdos históricos
+- [ ] Confirmar se o bucket privado contém imagens, PDFs e anexos
+- [ ] Corrigir a importação dos conteúdos históricos, se necessário
+- [ ] Corrigir a emissão de URLs assinados para imagens e documentos
+- [ ] Validar o carregamento após login de proprietário e visitante
+
+## 404 no link directo da Gestão
+
+- [ ] Garantir que `/gestao` abre a aplicação em Cloudflare Pages
+- [ ] Garantir que o alias `/Jos-lio-portofolio-/gestao` também abre a aplicação
+- [ ] Validar o redireccionamento para login sem sessão
+- [ ] Validar a abertura da Gestão depois do login do proprietário
