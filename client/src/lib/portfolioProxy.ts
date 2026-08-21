@@ -47,10 +47,19 @@ export type VisitorPassword = { id: string; label?: string; createdAt: string; e
 
 async function ownerFunction<T>(action: string, body: Record<string, unknown> = {}): Promise<T> {
   if (!supabase) throw new Error("O Supabase não está configurado neste deployment.");
-  const { data, error } = await supabase.functions.invoke("portfolio-access", { body: { action, ...body } });
-  if (error) throw error;
-  if (data?.error) throw new Error(String(data.error));
-  return data as T;
+  const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+  if (sessionError) throw new Error(`Sessão Supabase: ${sessionError.message}`);
+  const accessToken = sessionData.session?.access_token;
+  if (!accessToken) throw new Error("Sessão owner inexistente ou expirada. Termine a sessão e entre novamente.");
+  const response = await fetch(FUNCTION_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
+    body: JSON.stringify({ action, ...body }),
+  });
+  const payload = await response.json().catch(() => ({})) as { error?: string } & T;
+  if (!response.ok) throw new Error(`Edge Function ${response.status}: ${payload.error ?? "resposta sem detalhes"}`);
+  if (payload.error) throw new Error(`Edge Function ${response.status}: ${String(payload.error)}`);
+  return payload as T;
 }
 
 export async function generateVisitorPassword(label: string, expiresInHours: number): Promise<{ password: string; record: VisitorPassword }> {
