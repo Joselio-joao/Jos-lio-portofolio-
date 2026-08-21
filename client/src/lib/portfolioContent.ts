@@ -29,11 +29,13 @@ function normalizeLegacyAssetUrl(value: string | undefined): string | undefined 
 function mergeLegacyAssets(items: PortfolioItem[], legacy: PortfolioItem[]): PortfolioItem[] {
   const byId = new Map(legacy.map((item) => [item.id, item]));
   const byTitle = new Map(legacy.map((item) => [item.title.trim().toLowerCase(), item]));
-  return items.map((item) => {
+  const merged = items.map((item) => {
     const fallback = byId.get(item.id) ?? byTitle.get(item.title.trim().toLowerCase());
     if (!fallback) return item;
     return { ...item, image: item.image || fallback.image, pdf: item.pdf || fallback.pdf, attachment: item.attachment?.url ? item.attachment : fallback.attachment, externalUrl: item.externalUrl || fallback.externalUrl };
   });
+  const seen = new Set(merged.flatMap((item) => [item.id, item.title.trim().toLowerCase()]));
+  return [...merged, ...legacy.filter((item) => !seen.has(item.id) && !seen.has(item.title.trim().toLowerCase()))];
 }
 const PUBLIC_UPLOADS_URL = `${import.meta.env.BASE_URL}uploads`;
 const PORTFOLIO_CACHE_KEY = "portfolio-content-cache-v1";

@@ -236,3 +236,25 @@
 - [ ] Garantir que certificados e PDFs aparecem na página Certificados
 - [ ] Garantir que imagens e ligações aparecem nas páginas correspondentes
 - [ ] Confirmar que o carregamento continua protegido por autenticação
+
+## Itens continuam ausentes após a correcção
+
+- [ ] Confirmar se o deployment publicado contém o commit `970d3bb`
+- [ ] Confirmar se `data/portfolio-content.json` está acessível no domínio público
+- [ ] Confirmar se a sessão válida chama a origem correcta dos conteúdos
+- [ ] Corrigir a fonte efectiva dos itens se o fallback ainda não for executado
+- [ ] Validar visualmente os itens no iPhone
+
+## Deployment correcto activo; diagnóstico pós-login
+
+- [x] Confirmar no Cloudflare que `970d3bb` está em Production
+- [ ] Confirmar que o login cria uma sessão de proprietário ou visitante
+- [ ] Confirmar que a rota Certificados recebe os itens após a sessão
+- [ ] Corrigir a falha específica identificada no teste pós-login
+
+## Itens visíveis, imagens quebradas e secções vazias
+
+- [x] Confirmar que os certificados e PDFs aparecem no iPhone
+- [ ] Corrigir os caminhos das imagens históricas
+- [ ] Fazer Projectos, Eventos e Obras usar o índice histórico carregado
+- [ ] Validar as imagens e as três secções no deployment
