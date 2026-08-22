@@ -2,7 +2,7 @@ import type { PortfolioItem } from "./portfolioContent";
 import { supabase } from "./supabase";
 
 const SUPABASE_URL = String(import.meta.env.VITE_SUPABASE_URL ?? "").replace(/\/$/, "");
-const FUNCTION_URL = SUPABASE_URL ? `${SUPABASE_URL}/functions/v1/Portfolio-access` : "";
+const FUNCTION_URL = SUPABASE_URL ? `${SUPABASE_URL}/functions/v1/portfolio-access` : "";
 const TOKEN_KEY = "portfolio-proxy-session";
 
 type ProxySession = { token: string; expiresAt: number; role?: "visitor" };

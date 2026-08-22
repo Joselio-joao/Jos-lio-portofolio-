@@ -258,3 +258,98 @@
 - [ ] Corrigir os caminhos das imagens históricas
 - [ ] Fazer Projectos, Eventos e Obras usar o índice histórico carregado
 - [ ] Validar as imagens e as três secções no deployment
+
+## Geração de palavras-passe temporárias bloqueada
+
+- [ ] Capturar e diagnosticar o erro devolvido ao gerar código
+- [ ] Confirmar a autorização owner na Edge Function
+- [ ] Confirmar a tabela e função SQL de consumo/geração
+- [ ] Mostrar o código gerado uma única vez na Gestão
+- [ ] Validar a listagem e o primeiro uso
+
+## Edge Function devolve erro não-2xx ao gerar código
+
+- [ ] Obter o código HTTP e a mensagem nos logs de `portfolio-access`
+- [ ] Corrigir secret, verificação JWT, autorização owner ou tabela conforme o diagnóstico
+- [ ] Repetir a geração no painel móvel
+
+## Edge Function portfolio-access devolve 404
+
+- [x] Confirmar nos logs que o endpoint responde 404
+- [ ] Confirmar que a função existe no mesmo projecto Supabase usado por `VITE_SUPABASE_URL`
+- [ ] Publicar/activar a função com o nome exacto `portfolio-access`
+- [ ] Repetir a geração de uma palavra-passe temporária
+
+## Função ainda não criada no Supabase
+
+- [x] Confirmar que `portfolio-access` não existe no projecto activo
+- [ ] Criar a Edge Function com o nome exacto `portfolio-access`
+- [ ] Configurar `PORTFOLIO_SESSION_SECRET` e a validação JWT adequada
+- [ ] Testar a geração de código no painel Gestão
+
+## Esquema de palavras-passe ainda incompleto
+
+- [ ] Confirmar a existência de `portfolio_visitor_passwords`
+- [ ] Aplicar a função SQL `consume_visitor_password`
+- [ ] Confirmar ou criar `portfolio_access_logs`
+- [ ] Criar e publicar `portfolio-access`
+- [ ] Testar geração, utilização única e auditoria
+
+## Edge Function criada mas ainda com erro não-2xx
+
+- [x] Confirmar que o endpoint já não devolve 404
+- [ ] Obter a mensagem detalhada do novo erro
+- [ ] Corrigir a tabela, função SQL, secret ou autorização indicada pelo log
+- [ ] Confirmar que o código aparece depois de gerar
+
+## Logs sem resultados por filtros
+
+- [ ] Remover o filtro de tipo e ajustar o período dos logs
+- [ ] Reproduzir a geração depois de actualizar os logs
+- [ ] Abrir a invocação e capturar o erro detalhado
+
+## Secret confirmado, geração continua a falhar
+
+- [x] Confirmar que `PORTFOLIO_SESSION_SECRET` existe
+- [ ] Verificar existência e colunas de `portfolio_visitor_passwords`
+- [x] Verificar existência de `consume_visitor_password`
+- [x] Confirmar a associação owner e erro de inserção
+
+## Esquema confirmado; consulta antiga inválida
+
+- [x] Confirmar `portfolio_visitor_passwords`
+- [x] Confirmar `portfolio_access_logs`
+- [x] Confirmar visualmente a função `consume_visitor_password` e o papel owner
+- [ ] Corrigir a geração apenas se o novo diagnóstico indicar falha
+
+## Verify JWT desligado; erro interno pendente
+
+- [x] Confirmar que Verify JWT está desligado
+- [ ] Confirmar que a função tem as variáveis automáticas do Supabase
+- [ ] Obter a mensagem interna da invocação
+- [ ] Corrigir a causa do não-2xx
+
+## Teste manual sem Authorization
+
+- [x] Confirmar que o 401 do corpo `{ "name": "Functions" }` sem header é esperado
+- [ ] Reproduzir apenas pelo botão da Gestão com sessão owner
+- [ ] Capturar a resposta real da chamada autenticada
+
+## Diagnóstico detalhado no próprio site
+
+- [x] Preservar status HTTP e corpo JSON no cliente proxy
+- [x] Mostrar a mensagem concreta na área de Gestão
+- [x] Publicar e repetir a geração pelo iPhone
+
+## Nome da Edge Function com capitalização diferente
+
+- [x] Identificar `Portfolio-access` no Supabase e `portfolio-access` no frontend
+- [x] Confirmar que a função publicada activa se chama `portfolio-access`
+- [ ] Fazer redeploy do frontend alinhado com `portfolio-access` e testar a geração owner
+
+## 404 persiste após alinhar a capitalização
+
+- [ ] Comparar o project ref do `VITE_SUPABASE_URL` com o URL da função
+- [ ] Confirmar o slug exacto mostrado no endpoint da função
+- [ ] Corrigir a configuração do endpoint definitivo
+- [ ] Repetir a geração owner
