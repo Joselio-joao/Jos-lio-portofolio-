@@ -25,7 +25,9 @@ export function clearPortfolioProxySession(): void { sessionStorage.removeItem(T
 async function request<T>(action: string, body: Record<string, unknown> = {}): Promise<T> {
   if (!FUNCTION_URL) throw new Error("O Supabase não está configurado neste deployment.");
   const session = readSession();
-  const response = await fetch(FUNCTION_URL, { method: "POST", headers: { "Content-Type": "application/json", ...(SUPABASE_ANON_KEY ? { apikey: SUPABASE_ANON_KEY } : {}), ...(session ? { Authorization: `Bearer ${session.token}` } : {}) }, body: JSON.stringify({ action, ...body }) });
+  const ownerToken = !session && supabase ? (await supabase.auth.getSession()).data.session?.access_token : undefined;
+  const bearerToken = session?.token ?? ownerToken;
+  const response = await fetch(FUNCTION_URL, { method: "POST", headers: { "Content-Type": "application/json", ...(SUPABASE_ANON_KEY ? { apikey: SUPABASE_ANON_KEY } : {}), ...(bearerToken ? { Authorization: `Bearer ${bearerToken}` } : {}) }, body: JSON.stringify({ action, ...body }) });
   const payload = await response.json().catch(() => ({})) as { error?: string } & T;
   if (!response.ok) throw new Error(payload.error ?? "Não foi possível concluir o pedido.");
   return payload;

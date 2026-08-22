@@ -402,3 +402,10 @@
 - [x] Confirmar o URL oficial `portofolio-access`
 - [ ] Actualizar o cliente proxy para `portofolio-access`
 - [ ] Publicar e validar a geração do código
+
+## Owner autenticado, mas Gestão vazia
+
+- [ ] Auditar por que `loadProxyPortfolioContent` devolve zero itens
+- [ ] Activar o botão de importação histórica quando owner está autenticado
+- [ ] Activar e validar a geração/listagem de palavras-passe
+- [ ] Publicar e confirmar conteúdos e códigos no iPhone

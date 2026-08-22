@@ -144,7 +144,8 @@ async function refreshSupabasePortfolioContent(): Promise<PortfolioItem[] | null
 }
 
 export async function loadPortfolioContent(): Promise<PortfolioItem[]> {
-  if (hasPortfolioProxySession()) {
+  const supabaseSession = supabase ? (await supabase.auth.getSession()).data.session : null;
+  if (hasPortfolioProxySession() || Boolean(supabaseSession)) {
     try {
       const proxyItems = await loadProxyPortfolioContent();
       const legacyItems = await refreshPortfolioContent();
