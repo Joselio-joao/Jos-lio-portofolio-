@@ -2,6 +2,7 @@ import type { PortfolioItem } from "./portfolioContent";
 import { supabase } from "./supabase";
 
 const SUPABASE_URL = String(import.meta.env.VITE_SUPABASE_URL ?? "").replace(/\/$/, "");
+const SUPABASE_ANON_KEY = String(import.meta.env.VITE_SUPABASE_ANON_KEY ?? "");
 const FUNCTION_URL = SUPABASE_URL ? `${SUPABASE_URL}/functions/v1/portfolio-access` : "";
 const TOKEN_KEY = "portfolio-proxy-session";
 
@@ -24,7 +25,7 @@ export function clearPortfolioProxySession(): void { sessionStorage.removeItem(T
 async function request<T>(action: string, body: Record<string, unknown> = {}): Promise<T> {
   if (!FUNCTION_URL) throw new Error("O Supabase não está configurado neste deployment.");
   const session = readSession();
-  const response = await fetch(FUNCTION_URL, { method: "POST", headers: { "Content-Type": "application/json", ...(session ? { Authorization: `Bearer ${session.token}` } : {}) }, body: JSON.stringify({ action, ...body }) });
+  const response = await fetch(FUNCTION_URL, { method: "POST", headers: { "Content-Type": "application/json", ...(SUPABASE_ANON_KEY ? { apikey: SUPABASE_ANON_KEY } : {}), ...(session ? { Authorization: `Bearer ${session.token}` } : {}) }, body: JSON.stringify({ action, ...body }) });
   const payload = await response.json().catch(() => ({})) as { error?: string } & T;
   if (!response.ok) throw new Error(payload.error ?? "Não foi possível concluir o pedido.");
   return payload;
@@ -53,7 +54,7 @@ async function ownerFunction<T>(action: string, body: Record<string, unknown> = 
   if (!accessToken) throw new Error("Sessão owner inexistente ou expirada. Termine a sessão e entre novamente.");
   const response = await fetch(FUNCTION_URL, {
     method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
+    headers: { "Content-Type": "application/json", ...(SUPABASE_ANON_KEY ? { apikey: SUPABASE_ANON_KEY } : {}), Authorization: `Bearer ${accessToken}` },
     body: JSON.stringify({ action, ...body }),
   });
   const payload = await response.json().catch(() => ({})) as { error?: string } & T;
