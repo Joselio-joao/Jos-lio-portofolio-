@@ -67,9 +67,10 @@ Deno.serve(async (request) => {
       return json({ logs: (data ?? []).map((row) => ({ id: row.id, accessedAt: row.accessed_at, success: row.success, userAgent: row.user_agent ?? undefined })) });
     }
     if (body.action === "visitor_login") {
-      const candidateHash = await hash(String(body.password ?? ""));
+      const candidateHash = await hash(String(body.password ?? "").trim());
       const { data: consumed, error } = await admin.rpc("consume_visitor_password", { candidate_hash: candidateHash, visitor_user_agent: typeof body.userAgent === "string" ? body.userAgent : "unknown", visitor_ip_hash: ipHash });
-      const success = !error && Array.isArray(consumed) && consumed.length === 1;
+      const consumedRows = Array.isArray(consumed) ? consumed : consumed ? [consumed] : [];
+      const success = !error && consumedRows.length === 1;
       await admin.from("portfolio_access_logs").insert({ success, user_agent: typeof body.userAgent === "string" ? body.userAgent.slice(0, 500) : null, ip_hash: ipHash });
       if (!success) return json({ error: "Palavra-passe de visitante inválida, expirada ou já utilizada." }, 401);
       return json(await createToken(sessionSecret, "visitor"));

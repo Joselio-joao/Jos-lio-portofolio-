@@ -430,3 +430,16 @@
 - [ ] Verificar se as páginas públicas estão a exigir sessão ou a carregar uma origem diferente
 - [ ] Aplicar somente a correcção confirmada pela evidência
 - [ ] Pedir confirmação do resultado antes de outro ciclo de alterações
+
+## Correcção anterior não visível no site
+
+- [ ] Confirmar o commit realmente servido pelo domínio público
+- [ ] Comparar o bundle público com o commit `d5209aa`
+- [ ] Comparar o conteúdo público com os itens apresentados na Gestão
+- [ ] Fazer uma única correcção baseada na divergência confirmada
+
+## Código temporário inválido no primeiro uso
+
+- [ ] Publicar a normalização do código na Edge Function `portofolio-access`
+- [ ] Gerar um código novo e testar exactamente uma utilização
+- [ ] Confirmar login do proprietário e carregamento de Projectos/Eventos

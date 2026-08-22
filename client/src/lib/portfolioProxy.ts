@@ -40,7 +40,9 @@ export async function signInWithOwnerPassword(email: string, password: string): 
 }
 
 export async function signInWithVisitorPassword(password: string): Promise<void> {
-  const payload = await request<{ token: string; expiresAt: number; role: "visitor" }>("visitor_login", { password, userAgent: navigator.userAgent });
+  const normalizedPassword = password.trim();
+  if (!normalizedPassword) throw new Error("Introduza a palavra-passe de visitante.");
+  const payload = await request<{ token: string; expiresAt: number; role: "visitor" }>("visitor_login", { password: normalizedPassword, userAgent: navigator.userAgent });
   sessionStorage.setItem(TOKEN_KEY, JSON.stringify(payload));
 }
 
