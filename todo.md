@@ -345,7 +345,7 @@
 
 - [x] Identificar `Portfolio-access` no Supabase e `portfolio-access` no frontend
 - [x] Confirmar que a função publicada activa se chama `portfolio-access`
-- [ ] Fazer redeploy do frontend alinhado com `portfolio-access` e testar a geração owner
+- [x] Fazer redeploy do frontend alinhado com `portfolio-access` e testar a geração owner
 
 ## 404 persiste após alinhar a capitalização
 
@@ -353,3 +353,52 @@
 - [ ] Confirmar o slug exacto mostrado no endpoint da função
 - [ ] Corrigir a configuração do endpoint definitivo
 - [ ] Repetir a geração owner
+
+## 404 após nova publicação do endpoint
+
+- [ ] Confirmar se o bundle público contém `/functions/v1/portfolio-access`
+- [ ] Confirmar se o Cloudflare publicou o commit `791820e`
+- [ ] Comparar o URL da função no Supabase com o URL embutido no bundle
+- [x] Corrigir a divergência final e repetir a geração
+
+## Deployment ed0395c activo; 404 Supabase pendente
+
+- [x] Confirmar no Cloudflare que `ed0395c` está em Production
+- [ ] Testar o endpoint com `apikey` pública
+- [ ] Comparar a resposta directa com o erro da Gestão
+- [ ] Corrigir o endpoint ou a função conforme a resposta
+
+## Função sem invocações após publicação
+
+- [ ] Executar uma chamada pelo botão Test
+- [ ] Confirmar que o contador passa de 0 para 1
+- [ ] Abrir a resposta da invocação e identificar eventual erro
+- [ ] Repetir a geração no site depois da confirmação
+
+## Função activa; renovar sessão do site
+
+- [x] Confirmar resposta da função publicada com 401 esperado no teste sem auth
+- [ ] Limpar sessão/cache antiga no iPhone
+- [ ] Entrar novamente como owner e gerar código
+- [ ] Confirmar o código temporário na Gestão
+
+## Gestão apenas online e 404 em aba privada
+
+- [ ] Remover leitura/escrita IndexedDB da área Gestão
+- [ ] Confirmar a resposta actual do endpoint com apikey
+- [ ] Corrigir a chamada owner se o 404 vier do frontend
+- [ ] Publicar e validar geração online
+
+## Edge Function publicada mas com erro interno 500
+
+- [x] Confirmar que a função recebe invocações
+- [x] Confirmar erro `undefined is not an object (evaluating 'a.error')`
+- [ ] Auditar a resposta RPC e o tratamento de erros em `index.ts`
+- [ ] Corrigir e publicar novamente a Edge Function
+- [ ] Validar geração owner e consumo único
+
+## Correcção final do slug da Edge Function
+
+- [x] Confirmar o URL oficial `portofolio-access`
+- [ ] Actualizar o cliente proxy para `portofolio-access`
+- [ ] Publicar e validar a geração do código
