@@ -72,7 +72,15 @@ Deno.serve(async (request) => {
       const consumedRows = Array.isArray(consumed) ? consumed : consumed ? [consumed] : [];
       const success = !error && consumedRows.length === 1;
       await admin.from("portfolio_access_logs").insert({ success, user_agent: typeof body.userAgent === "string" ? body.userAgent.slice(0, 500) : null, ip_hash: ipHash });
-      if (!success) return json({ error: "Palavra-passe de visitante inválida, expirada ou já utilizada." }, 401);
+      if (!success) {
+        if (error) {
+          const diagnostic = [error.message, error.code, error.details].filter((value) => typeof value === "string" && value.trim()).join(" · ");
+          console.error("visitor_login consume_visitor_password failed", { message: error.message, code: error.code, details: error.details });
+          return json({ error: `Não foi possível validar o código no Supabase: ${diagnostic || "erro SQL sem detalhe"}.` }, 500);
+        }
+        if (consumedRows.length === 0) return json({ error: "O Supabase não encontrou um código activo para este pedido. Confirme se o código é o mais recente, não expirou e ainda não foi utilizado." }, 401);
+        return json({ error: "O Supabase devolveu uma resposta inesperada ao consumir o código. Não tente reutilizar este código." }, 500);
+      }
       return json(await createToken(sessionSecret, "visitor"));
     }
     if (body.action === "list") {
