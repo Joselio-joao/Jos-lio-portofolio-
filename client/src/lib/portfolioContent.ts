@@ -5,6 +5,7 @@ import { hasPortfolioProxySession, loadProxyPortfolioContent, saveProxyPortfolio
 export type PortfolioKind = "projectos" | "eventos" | "obras" | "certificados" | "instituicoes";
 export type PortfolioAttachment = { url: string; name: string; mime: string; type: "office" | "video" };
 export type PortfolioItem = { id: string; kind: PortfolioKind; title: string; description: string; category?: string; image?: string; pdf?: string; attachment?: PortfolioAttachment; externalUrl?: string; updatedAt: number };
+export type OwnerPublishingDiagnostic = { session: boolean; owner: boolean; canWrite: boolean; itemsReadable: boolean; storageReadable: boolean; issue?: string };
 
 export type GitHubInventoryFile = { name: string; path: string; sha: string; size: number; type: "file" | "dir"; url: string };
 export type GitHubSession = { repository: string; branch: string; canWrite: boolean; permissions: { metadata?: string; contents?: string } };
@@ -42,6 +43,19 @@ const PORTFOLIO_CACHE_KEY = "portfolio-content-cache-v1";
 const MAX_ATTACHMENT_BYTES = 25 * 1024 * 1024;
 const BLOCKED_PATH_PARTS = ["..", ".git", ".env", "credentials", "secrets"];
 const ALLOWED_TEXT_EXTENSIONS = [".html", ".css", ".js", ".json", ".md", ".txt", ".xml", ".svg", ".webmanifest"];
+
+type ErrorLike = { message?: unknown; details?: unknown; hint?: unknown; code?: unknown };
+
+export function readablePortfolioError(error: unknown, fallback: string): string {
+  const source = (error && typeof error === "object" ? error : {}) as ErrorLike;
+  const code = typeof source.code === "string" ? source.code : "";
+  const message = typeof source.message === "string" ? source.message : error instanceof Error ? error.message : "";
+  const normalized = message.toLowerCase();
+  if (code === "42501" || normalized.includes("row-level security") || normalized.includes("permission denied")) return "A sessão entrou, mas o Supabase ainda bloqueia a escrita por RLS. Execute a correcção de publicação RLS e actualize esta página.";
+  if (normalized.includes("jwt") || normalized.includes("session") || normalized.includes("not authenticated")) return "A sessão expirou. Termine a sessão, entre novamente como proprietário e tente de novo.";
+  if (normalized.includes("storage") || normalized.includes("bucket")) return "O Supabase bloqueou o ficheiro no Storage privado. Confirme a correcção de publicação RLS e tente novamente.";
+  return message || fallback;
+}
 
 type GitHubFile = { sha: string; size?: number; content?: string; encoding?: string; name?: string; path?: string; type?: "file" | "dir"; html_url?: string; download_url?: string };
 type AssetKind = "image" | "pdf" | "attachment";
@@ -144,9 +158,35 @@ async function refreshSupabasePortfolioContent(): Promise<PortfolioItem[] | null
   return Promise.all((data as SupabasePortfolioRow[]).map(rowToPortfolioItem));
 }
 
+export async function diagnoseOwnerPublishing(): Promise<OwnerPublishingDiagnostic> {
+  if (!supabase) return { session: false, owner: false, canWrite: false, itemsReadable: false, storageReadable: false, issue: "O Supabase não está configurado neste deployment." };
+  const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+  const user = sessionData.session?.user;
+  if (sessionError || !user) return { session: false, owner: false, canWrite: false, itemsReadable: false, storageReadable: false, issue: "A sessão de proprietário não está disponível." };
+  const [{ data: membership, error: membershipError }, { data: writePermission, error: writeError }, { error: itemsError }, { error: storageError }] = await Promise.all([
+    supabase.from("portfolio_members").select("role").eq("user_id", user.id).maybeSingle(),
+    supabase.rpc("can_edit_portfolio"),
+    supabase.from("portfolio_items").select("id").limit(1),
+    supabase.storage.from("portfolio-private").list("items", { limit: 1 }),
+  ]);
+  const owner = membership?.role === "owner" || membership?.role === "editor";
+  const canWrite = writePermission === true;
+  const issue = membershipError ? readablePortfolioError(membershipError, "Não foi possível consultar o papel do utilizador.") : writeError ? readablePortfolioError(writeError, "O Supabase não permitiu confirmar a escrita.") : !canWrite ? "A sessão existe, mas o Supabase não reconhece esta conta com permissão de escrita. Execute a correcção RLS da Gestão." : itemsError ? readablePortfolioError(itemsError, "Não foi possível consultar a tabela de conteúdos.") : storageError ? readablePortfolioError(storageError, "Não foi possível consultar o Storage privado.") : undefined;
+  return { session: true, owner, canWrite, itemsReadable: !itemsError, storageReadable: !storageError, issue };
+}
+
 export async function loadPortfolioContent(): Promise<PortfolioItem[]> {
   const supabaseSession = supabase ? (await supabase.auth.getSession()).data.session : null;
-  if (hasPortfolioProxySession() || Boolean(supabaseSession)) {
+  if (supabaseSession) {
+    const supabaseItems = await refreshSupabasePortfolioContent();
+    if (supabaseItems !== null) {
+      const legacyItems = await refreshPortfolioContent();
+      const mergedItems = legacyItems && legacyItems.length > 0 ? (supabaseItems.length > 0 ? mergeLegacyAssets(supabaseItems, legacyItems) : legacyItems) : supabaseItems;
+      await saveStoredData(PORTFOLIO_CACHE_KEY, mergedItems).catch(() => undefined);
+      return mergedItems;
+    }
+  }
+  if (hasPortfolioProxySession()) {
     try {
       const proxyItems = await loadProxyPortfolioContent();
       const legacyItems = await refreshPortfolioContent();

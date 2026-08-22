@@ -100,14 +100,35 @@ export async function generateVisitorPassword(label: string, expiresInHours: num
 }
 
 export async function loadVisitorPasswords(): Promise<VisitorPassword[]> {
-  return (await ownerFunction<{ passwords: VisitorPassword[] }>("owner_list_visitor_passwords")).passwords;
+  try {
+    return (await ownerFunction<{ passwords: VisitorPassword[] }>("owner_list_visitor_passwords")).passwords;
+  } catch (edgeError) {
+    if (!supabase) throw edgeError;
+    const { data, error } = await supabase.from("portfolio_visitor_passwords").select("id,label,created_at,expires_at,used_at").order("created_at", { ascending: false }).limit(100);
+    if (error) throw error;
+    return (data ?? []).map((row) => ({ id: row.id, label: row.label ?? undefined, createdAt: row.created_at, expiresAt: row.expires_at, usedAt: row.used_at ?? undefined }));
+  }
 }
 
 export async function revokeVisitorPassword(id: string): Promise<void> {
-  await ownerFunction("owner_revoke_visitor_password", { id });
+  try {
+    await ownerFunction("owner_revoke_visitor_password", { id });
+  } catch (edgeError) {
+    if (!supabase) throw edgeError;
+    const { error } = await supabase.from("portfolio_visitor_passwords").update({ expires_at: new Date().toISOString() }).eq("id", id).is("used_at", null);
+    if (error) throw error;
+  }
 }
 
 export async function loadPortfolioAccessLogs(): Promise<PortfolioAccessLog[]> {
-  if (supabase) return (await ownerFunction<{ logs: PortfolioAccessLog[] }>("owner_logs")).logs;
+  if (supabase) {
+    try {
+      return (await ownerFunction<{ logs: PortfolioAccessLog[] }>("owner_logs")).logs;
+    } catch (edgeError) {
+      const { data, error } = await supabase.from("portfolio_access_logs").select("id,accessed_at,success,user_agent").order("accessed_at", { ascending: false }).limit(100);
+      if (error) throw error;
+      return (data ?? []).map((row) => ({ id: row.id, accessedAt: row.accessed_at, success: row.success, userAgent: row.user_agent ?? undefined }));
+    }
+  }
   return (await request<{ logs: PortfolioAccessLog[] }>("logs")).logs;
 }

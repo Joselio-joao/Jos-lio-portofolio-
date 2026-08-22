@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { getDataUrlAsset, listGitHubFiles, loadPortfolioContent, normalizePortfolioItem, publicUploadUrl, readGitHubTextFile, validateExternalUrl, verifyGitHubAccess } from "./portfolioContent";
+import { getDataUrlAsset, listGitHubFiles, loadPortfolioContent, normalizePortfolioItem, publicUploadUrl, readablePortfolioError, readGitHubTextFile, validateExternalUrl, verifyGitHubAccess } from "./portfolioContent";
 
 describe("portfolio content", () => {
   it("normalizes required fields and optional metadata", () => {
@@ -30,6 +30,11 @@ describe("portfolio content", () => {
   it("keeps only safe HTTP(S) external links", () => {
     expect(validateExternalUrl("https://example.org/documento")).toBe("https://example.org/documento");
     expect(() => validateExternalUrl("javascript:alert(1)")).toThrow("A ligação externa deve começar");
+  });
+
+  it("turns RLS and session failures into actionable messages for the Gestão", () => {
+    expect(readablePortfolioError({ code: "42501", message: "new row violates row-level security policy" }, "Erro genérico")).toContain("bloqueia a escrita por RLS");
+    expect(readablePortfolioError({ message: "JWT expired" }, "Erro genérico")).toContain("sessão expirou");
   });
 
   it("validates the configured repository and branch before enabling publication", async () => {
