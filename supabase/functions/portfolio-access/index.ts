@@ -74,9 +74,16 @@ Deno.serve(async (request) => {
       if (!success) return json({ error: "Palavra-passe de visitante inválida, expirada ou já utilizada." }, 401);
       return json(await createToken(sessionSecret, "visitor"));
     }
+    if (body.action === "list") {
+      const owner = await ownerFromRequest(admin, request);
+      const role = owner ? "owner" : await tokenRole(request, sessionSecret);
+      if (!role) return json({ error: "Sessão de visitante inválida ou expirada." }, 401);
+      const { data, error } = await admin.from("portfolio_items").select("*").eq("status", "published").order("order_index").order("updated_at", { ascending: false });
+      if (error) throw error;
+      return json({ items: await Promise.all((data ?? []).map((row) => itemToPublic(admin, row))) });
+    }
     const role = await tokenRole(request, sessionSecret);
     if (!role) return json({ error: "Sessão de visitante inválida ou expirada." }, 401);
-    if (body.action === "list") { const { data, error } = await admin.from("portfolio_items").select("*").eq("status", "published").order("order_index").order("updated_at", { ascending: false }); if (error) throw error; return json({ items: await Promise.all((data ?? []).map((row) => itemToPublic(admin, row))) }); }
     if (body.action === "save" || body.action === "logs") return json({ error: "Esta operação está reservada ao proprietário." }, 403);
     return json({ error: "Acção desconhecida." }, 400);
   } catch (error) { return json({ error: error instanceof Error ? error.message : "Erro interno." }, 500); }

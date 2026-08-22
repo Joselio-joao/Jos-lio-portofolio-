@@ -256,8 +256,8 @@
 
 - [x] Confirmar que os certificados e PDFs aparecem no iPhone
 - [ ] Corrigir os caminhos das imagens históricas
-- [ ] Fazer Projectos, Eventos e Obras usar o índice histórico carregado
-- [ ] Validar as imagens e as três secções no deployment
+- [x] Fazer Projectos, Eventos e Obras usar o índice histórico carregado
+- [ ] Validar as imagens e as três secções no deployment após o commit `04cf163`
 
 ## Geração de palavras-passe temporárias bloqueada
 
@@ -423,3 +423,10 @@
 - [ ] Corrigir filtros de `kind` para Projectos, Eventos, Obras, Certificados e Instituições
 - [ ] Garantir que a sessão visitante/owner é reconhecida no layout público
 - [ ] Validar todas as secções no iPhone
+
+## Diagnóstico sem novas tentativas especulativas
+
+- [ ] Comparar os itens visíveis na Gestão com os itens recebidos pelas páginas públicas
+- [ ] Verificar se as páginas públicas estão a exigir sessão ou a carregar uma origem diferente
+- [ ] Aplicar somente a correcção confirmada pela evidência
+- [ ] Pedir confirmação do resultado antes de outro ciclo de alterações
