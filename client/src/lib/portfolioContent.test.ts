@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { getDataUrlAsset, listGitHubFiles, loadPortfolioContent, normalizePortfolioItem, publicUploadUrl, readablePortfolioError, readGitHubTextFile, validateExternalUrl, verifyGitHubAccess } from "./portfolioContent";
+import { getDataUrlAsset, listGitHubFiles, loadPortfolioContent, normalizePortfolioItem, normalizeSupabaseItemId, publicUploadUrl, readablePortfolioError, readGitHubTextFile, validateExternalUrl, verifyGitHubAccess } from "./portfolioContent";
 
 describe("portfolio content", () => {
   it("normalizes required fields and optional metadata", () => {
@@ -35,6 +35,13 @@ describe("portfolio content", () => {
   it("turns RLS and session failures into actionable messages for the Gestão", () => {
     expect(readablePortfolioError({ code: "42501", message: "new row violates row-level security policy" }, "Erro genérico")).toContain("bloqueia a escrita por RLS");
     expect(readablePortfolioError({ message: "JWT expired" }, "Erro genérico")).toContain("sessão expirou");
+  });
+
+  it("converts a historical item ID into the same valid UUID every time", async () => {
+    const generated = await normalizeSupabaseItemId("teams-comunidade-projectos");
+    expect(generated).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-5[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+    await expect(normalizeSupabaseItemId("teams-comunidade-projectos")).resolves.toBe(generated);
+    await expect(normalizeSupabaseItemId("b4672b9a-0bb1-4c0d-8d4b-734165f0a0d8")).resolves.toBe("b4672b9a-0bb1-4c0d-8d4b-734165f0a0d8");
   });
 
   it("validates the configured repository and branch before enabling publication", async () => {

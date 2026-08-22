@@ -43,6 +43,7 @@ const PORTFOLIO_CACHE_KEY = "portfolio-content-cache-v1";
 const MAX_ATTACHMENT_BYTES = 25 * 1024 * 1024;
 const BLOCKED_PATH_PARTS = ["..", ".git", ".env", "credentials", "secrets"];
 const ALLOWED_TEXT_EXTENSIONS = [".html", ".css", ".js", ".json", ".md", ".txt", ".xml", ".svg", ".webmanifest"];
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 type ErrorLike = { message?: unknown; details?: unknown; hint?: unknown; code?: unknown };
 
@@ -55,6 +56,16 @@ export function readablePortfolioError(error: unknown, fallback: string): string
   if (normalized.includes("jwt") || normalized.includes("session") || normalized.includes("not authenticated")) return "A sessão expirou. Termine a sessão, entre novamente como proprietário e tente de novo.";
   if (normalized.includes("storage") || normalized.includes("bucket")) return "O Supabase bloqueou o ficheiro no Storage privado. Confirme a correcção de publicação RLS e tente novamente.";
   return message || fallback;
+}
+
+export async function normalizeSupabaseItemId(id: string): Promise<string> {
+  const candidate = id.trim();
+  if (UUID_PATTERN.test(candidate)) return candidate.toLowerCase();
+  const digest = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`portfolio-item:${candidate}`)));
+  digest[6] = (digest[6] & 0x0f) | 0x50;
+  digest[8] = (digest[8] & 0x3f) | 0x80;
+  const hex = Array.from(digest.slice(0, 16), (value) => value.toString(16).padStart(2, "0")).join("");
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
 }
 
 type GitHubFile = { sha: string; size?: number; content?: string; encoding?: string; name?: string; path?: string; type?: "file" | "dir"; html_url?: string; download_url?: string };
@@ -335,8 +346,9 @@ async function uploadSupabaseDataUrl(value: string | undefined, path: string): P
 
 async function saveSupabasePortfolioContent(items: PortfolioItem[]): Promise<PortfolioItem[]> {
   if (!supabase) throw new Error("O Supabase não está configurado.");
+  const normalizedItems = await Promise.all(items.map(async (item) => ({ ...item, id: await normalizeSupabaseItemId(item.id) })));
   const rows = [];
-  for (const item of items) {
+  for (const item of normalizedItems) {
     const imagePath = await uploadSupabaseDataUrl(item.image, `items/${item.id}/image.${getDataUrlAsset(item.image ?? "")?.extension ?? "bin"}`);
     const pdfPath = await uploadSupabaseDataUrl(item.pdf, `items/${item.id}/pdf.pdf`);
     const attachmentAsset = getDataUrlAsset(item.attachment?.url ?? "");
@@ -345,7 +357,7 @@ async function saveSupabasePortfolioContent(items: PortfolioItem[]): Promise<Por
   }
   const { data, error } = await supabase.from("portfolio_items").upsert(rows, { onConflict: "id" }).select("*");
   if (error) throw error;
-  const keepIds = new Set(items.map((item) => item.id));
+  const keepIds = new Set(normalizedItems.map((item) => item.id));
   const { data: existingRows, error: existingError } = await supabase.from("portfolio_items").select("id");
   if (existingError) throw existingError;
   const removedIds = (existingRows as Array<{ id: string }>).map((row) => row.id).filter((id) => !keepIds.has(id));
