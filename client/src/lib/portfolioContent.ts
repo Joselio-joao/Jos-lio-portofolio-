@@ -89,7 +89,8 @@ async function refreshPortfolioContent(): Promise<PortfolioItem[] | null> {
     const response = await fetch(publicContentUrl(), { cache: "no-store", headers: { Accept: "application/json" } });
     if (!response.ok) throw new Error(`Conteúdos públicos indisponíveis (${response.status}).`);
     const payload: unknown = await response.json();
-    const items = Array.isArray(payload) ? (payload as PortfolioItem[]).map((item) => ({ ...item, image: normalizeLegacyAssetUrl(item.image), pdf: normalizeLegacyAssetUrl(item.pdf), attachment: item.attachment ? { ...item.attachment, url: normalizeLegacyAssetUrl(item.attachment.url) ?? item.attachment.url } : undefined })) : [];
+    const rawItems = Array.isArray(payload) ? payload : (payload && typeof payload === "object" && Array.isArray((payload as { items?: unknown }).items) ? (payload as { items: PortfolioItem[] }).items : []);
+    const items = rawItems.map((item) => ({ ...item, image: normalizeLegacyAssetUrl(item.image), pdf: normalizeLegacyAssetUrl(item.pdf), attachment: item.attachment ? { ...item.attachment, url: normalizeLegacyAssetUrl(item.attachment.url) ?? item.attachment.url } : undefined }));
     await saveStoredData(PORTFOLIO_CACHE_KEY, items).catch(() => undefined);
     return items;
   } catch {

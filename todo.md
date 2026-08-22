@@ -405,7 +405,14 @@
 
 ## Owner autenticado, mas Gestão vazia
 
-- [ ] Auditar por que `loadProxyPortfolioContent` devolve zero itens
-- [ ] Activar o botão de importação histórica quando owner está autenticado
+- [x] Corrigir por que `loadProxyPortfolioContent` devolvia zero itens para owner
+- [x] Confirmar que a importação histórica fica activa com owner autenticado
 - [ ] Activar e validar a geração/listagem de palavras-passe
-- [ ] Publicar e confirmar conteúdos e códigos no iPhone
+- [ ] Confirmar conteúdos e códigos no iPhone após o deployment `81a3da3`
+
+## Erro HTTP 546 após autenticação owner
+
+- [ ] Identificar a operação que devolve 546
+- [ ] Corrigir a consulta ou resposta da Edge Function
+- [ ] Validar carregamento dos conteúdos e importação histórica
+- [ ] Confirmar novamente a geração de palavra-passe

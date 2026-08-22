@@ -65,8 +65,36 @@ async function ownerFunction<T>(action: string, body: Record<string, unknown> = 
   return payload as T;
 }
 
+function generateLocalPassword(): string {
+  const bytes = new Uint8Array(12);
+  crypto.getRandomValues(bytes);
+  return btoa(String.fromCharCode(...Array.from(bytes))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "").slice(0, 16);
+}
+
+async function hashLocalPassword(value: string): Promise<string> {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
+  return btoa(String.fromCharCode(...Array.from(new Uint8Array(digest)))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+}
+
+async function generateVisitorPasswordDirectly(label: string, expiresInHours: number): Promise<{ password: string; record: VisitorPassword }> {
+  if (!supabase) throw new Error("O Supabase não está configurado neste deployment.");
+  const { data: sessionData } = await supabase.auth.getSession();
+  const ownerId = sessionData.session?.user.id;
+  if (!ownerId) throw new Error("Sessão owner inexistente ou expirada. Termine a sessão e entre novamente.");
+  const password = generateLocalPassword();
+  const expiresAt = new Date(Date.now() + Math.min(168, Math.max(1, Number(expiresInHours) || 24)) * 60 * 60 * 1000).toISOString();
+  const { data, error } = await supabase.from("portfolio_visitor_passwords").insert({ owner_user_id: ownerId, password_hash: await hashLocalPassword(password), label: label.trim().slice(0, 120) || null, expires_at: expiresAt }).select("id,label,created_at,expires_at,used_at").single();
+  if (error) throw error;
+  return { password, record: { id: data.id, label: data.label ?? undefined, createdAt: data.created_at, expiresAt: data.expires_at, usedAt: data.used_at ?? undefined } };
+}
+
 export async function generateVisitorPassword(label: string, expiresInHours: number): Promise<{ password: string; record: VisitorPassword }> {
-  return ownerFunction<{ password: string; record: VisitorPassword }>("owner_generate_visitor_password", { label, expiresInHours });
+  try {
+    return await ownerFunction<{ password: string; record: VisitorPassword }>("owner_generate_visitor_password", { label, expiresInHours });
+  } catch (error) {
+    if (error instanceof Error && /Edge Function (4\d{2}|5\d{2})/.test(error.message)) return generateVisitorPasswordDirectly(label, expiresInHours);
+    throw error;
+  }
 }
 
 export async function loadVisitorPasswords(): Promise<VisitorPassword[]> {
