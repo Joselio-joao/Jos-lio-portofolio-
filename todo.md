@@ -416,3 +416,10 @@
 - [ ] Corrigir a consulta ou resposta da Edge Function
 - [ ] Validar carregamento dos conteúdos e importação histórica
 - [ ] Confirmar novamente a geração de palavra-passe
+
+## Itens da Gestão não aparecem no portefólio público
+
+- [ ] Confirmar a fonte usada pelas páginas públicas após autenticação
+- [ ] Corrigir filtros de `kind` para Projectos, Eventos, Obras, Certificados e Instituições
+- [ ] Garantir que a sessão visitante/owner é reconhecida no layout público
+- [ ] Validar todas as secções no iPhone

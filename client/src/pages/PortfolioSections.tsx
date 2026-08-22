@@ -47,16 +47,25 @@ export function BottomNav() {
   return <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-[#dbe3f0] bg-white/95 px-2 pb-[env(safe-area-inset-bottom)] pt-2 shadow-[0_-8px_24px_rgba(23,35,62,.08)] backdrop-blur-xl" aria-label="Navegação principal"><div className="mx-auto grid max-w-3xl grid-cols-6 gap-0">{navItems.map(({ href, label, icon: Icon }) => <Link key={href} href={href} onClick={(event) => goTo(event, href)} className="flex min-w-0 min-h-14 w-full flex-col items-center justify-center gap-0.5 rounded-xl px-0 py-2.5 text-center text-[9px] font-semibold leading-3 text-[#65718a] whitespace-normal break-words transition active:scale-[.98] hover:bg-[#f0edff] hover:text-[#6c5ce7] sm:gap-1 sm:px-1.5 sm:text-xs sm:leading-tight"><Icon className="h-5 w-5 shrink-0" />{label}</Link>)}</div></nav>;
 }
 
+function normalizedKind(value: unknown): string {
+  return String(value ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim().replace(/[ _-]+/g, "");
+}
+
+function itemsForKind(items: PortfolioItem[], kind: string): PortfolioItem[] {
+  const wanted = normalizedKind(kind);
+  return items.filter((item) => normalizedKind(item.kind) === wanted || normalizedKind(item.category) === wanted);
+}
+
 export function PlaceholderPage({ title, eyebrow, icon: Icon, description, kind }: { title: string; eyebrow: string; icon: typeof FolderKanban; description: string; kind: "projectos" | "eventos" | "obras" }) {
   const [items, setItems] = useState<PortfolioItem[]>([]);
-  useEffect(() => { loadPortfolioContent().then((stored) => setItems(stored.filter((item) => item.kind === kind))).catch(() => setItems([])); }, [kind]);
+  useEffect(() => { loadPortfolioContent().then((stored) => setItems(itemsForKind(stored, kind))).catch(() => setItems([])); }, [kind]);
   return <PortfolioShell title={title} eyebrow={eyebrow}><section className="mt-8 max-w-3xl rounded-2xl border border-[#dbe3f0] bg-white p-6 shadow-sm sm:p-8"><Icon className="h-8 w-8 text-primary" /><p className="mt-5 text-base leading-7 text-muted-foreground">{description}</p>{items.length === 0 ? <p className="mt-4 text-sm text-muted-foreground">Ainda não existem conteúdos adicionados nesta página.</p> : <div className="mt-6 grid gap-3 sm:grid-cols-2">{items.map((item) => <article key={item.id} className="rounded-xl border border-[#dbe3f0] p-4">{item.image && <img src={item.image} alt="" className="mb-3 h-32 w-full rounded-lg object-cover" />}<h2 className="font-semibold">{item.title}</h2><p className="mt-2 text-xs leading-5 text-muted-foreground">{item.description}</p><AttachmentCard attachment={item.attachment} />{item.externalUrl && <a href={item.externalUrl} target="_blank" rel="noreferrer" className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#17233e] px-3 py-2 text-xs font-semibold text-white">Abrir ligação <ExternalLink className="h-3.5 w-3.5" /></a>}</article>)}</div>}</section></PortfolioShell>;
 }
 
 export function CertificatesPage() {
   const [customItems, setCustomItems] = useState<PortfolioItem[]>([]);
   const [openPdfId, setOpenPdfId] = useState<string | null>(null);
-  useEffect(() => { loadPortfolioContent().then((stored) => setCustomItems(stored.filter((item) => item.kind === "certificados"))).catch(() => setCustomItems([])); }, []);
+  useEffect(() => { loadPortfolioContent().then((stored) => setCustomItems(itemsForKind(stored, "certificados"))).catch(() => setCustomItems([])); }, []);
   const allCertificates = useMemo(() => [...certificates.map((item) => ({ ...item, attachment: undefined, externalUrl: item.pdf })), ...customItems.map((item) => ({ id: item.id, title: item.title, category: item.category || "Certificate", groupId: "custom", description: item.description, image: customCertificateImage(item), pdf: item.pdf || "", attachment: item.attachment, externalUrl: item.externalUrl || item.pdf || "" }))], [customItems]);
   const [groupId, setGroupId] = useState("all");
   const [category, setCategory] = useState("Todos");
@@ -68,7 +77,7 @@ export function CertificatesPage() {
 
 export function InstitutionsPage() {
   const [customItems, setCustomItems] = useState<PortfolioItem[]>([]);
-  useEffect(() => { loadPortfolioContent().then((stored) => setCustomItems(stored.filter((item) => item.kind === "instituicoes"))).catch(() => setCustomItems([])); }, []);
+  useEffect(() => { loadPortfolioContent().then((stored) => setCustomItems(itemsForKind(stored, "instituicoes"))).catch(() => setCustomItems([])); }, []);
   const allGroups = [...groups.map((group) => ({ ...group, externalUrl: undefined })), ...customItems.map((item) => ({ id: item.id, name: item.title, description: item.description, image: item.image || `${base}/assets/ciq.jpg`, externalUrl: item.externalUrl }))];
   return <PortfolioShell title="Instituições" eyebrow="Percurso académico"><div className="mt-8 grid gap-3 sm:grid-cols-2">{allGroups.map((group) => <article key={group.id} className="flex items-center gap-4 rounded-2xl border border-[#dbe3f0] bg-white p-4 shadow-sm"><img src={group.image} alt={group.name} className="h-16 w-16 rounded-xl bg-[#f7f9fc] object-contain" /><div><h2 className="font-semibold text-[#17233e]">{group.name}</h2><p className="mt-1 text-xs leading-5 text-muted-foreground">{group.description}</p>{group.externalUrl && <a href={group.externalUrl} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline">Abrir ligação <ExternalLink className="h-3.5 w-3.5" /></a>}</div></article>)}</div></PortfolioShell>;
 }
