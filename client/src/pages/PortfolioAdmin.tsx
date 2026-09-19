@@ -10,7 +10,15 @@ const kinds: { value: PortfolioKind; label: string }[] = [
   { value: "projectos", label: "Projectos" }, { value: "eventos", label: "Eventos" }, { value: "obras", label: "Obras" }, { value: "certificados", label: "Certificados" }, { value: "instituicoes", label: "Instituições" },
 ];
 const emptyForm = { kind: "projectos" as PortfolioKind, title: "", description: "", category: "" };
-const staticInstitutionOptions = groups.map(({ id, name, description, image }) => ({ id, name, description, image }));
+const publicBase = import.meta.env.BASE_URL.replace(/\/$/, "");
+function resolveAdminImage(value: string | undefined): string {
+  if (!value) return "";
+  if (/^(https?:\/\/|data:|blob:)/i.test(value)) return value;
+  if (value.startsWith(`${publicBase}/`)) return value;
+  if (value.startsWith("/")) return `${publicBase}${value}`;
+  return `${publicBase}/${value}`;
+}
+const staticInstitutionOptions = groups.map(({ id, name, description, image }) => ({ id, name, description, image: resolveAdminImage(image) }));
 type InstitutionOption = typeof staticInstitutionOptions[number];
 const statusMessages: Record<string, string> = { "401": "O token GitHub é inválido ou expirou.", "403": "O token foi aceite, mas não tem a permissão necessária.", "404": "O repositório, branch ou ficheiro não foi encontrado.", "409": "O ficheiro remoto mudou. Recarregue-o antes de publicar." };
 
@@ -52,7 +60,7 @@ export default function PortfolioAdmin() {
   useEffect(() => { if (!user || !isOwner) return; let active = true; loadPortfolioContentCache().then((cached) => { if (active && cached.length) { setItems(cached); setMessage(`${cached.length} conteúdos em cache. A actualizar em segundo plano…`); } }).catch(() => undefined); loadPortfolioContent().then((stored) => { if (active) { setItems(stored); setMessage(`${stored.length} conteúdos protegidos carregados pelo Supabase.`); } }).catch((error) => { if (active) setMessage(readablePortfolioError(error, "Não foi possível carregar os conteúdos protegidos.")); }); diagnoseOwnerPublishing().then((result) => { if (active && result.issue) setMessage(result.issue); }).catch((error) => { if (active) setMessage(readablePortfolioError(error, "Não foi possível diagnosticar a Gestão.")); }); loadPortfolioAccessLogs().then((logs) => active && setAccessLogs(logs)).catch(() => undefined); loadVisitorPasswords().then((passwords) => active && setVisitorPasswords(passwords)).catch(() => undefined); return () => { active = false; }; }, [isOwner, user]);
   if (user && !isOwner) return <main className="grid min-h-screen place-items-center bg-[#17233e] px-4 text-center text-white"><section className="max-w-md rounded-3xl bg-white p-8 text-[#17233e] shadow-2xl"><h1 className="display-font text-2xl">Gestão reservada</h1><p className="mt-3 text-sm leading-6 text-muted-foreground">A sua sessão de visitante permite consultar o portefólio, mas não permite gerir conteúdos nem gerar palavras-passe.</p><button type="button" onClick={signOut} className="mt-5 rounded-full bg-[#17233e] px-5 py-2.5 text-xs font-semibold text-white">Terminar sessão</button></section></main>;
 
-  const availableInstitutions = useMemo(() => { const dynamic = items.filter((item) => item.kind === "instituicoes").map((item) => ({ id: item.groupIds?.[0] ?? (item.id.startsWith("institution-") ? item.id.slice("institution-".length) : item.id), name: item.title, description: item.description, image: item.image ?? "" })); const merged = [...staticInstitutionOptions]; for (const institution of dynamic) { const index = merged.findIndex((candidate) => candidate.id === institution.id || candidate.name.trim().toLowerCase() === institution.name.trim().toLowerCase()); if (index >= 0) merged[index] = { ...merged[index], ...institution }; else merged.push(institution); } return merged; }, [items]);
+  const availableInstitutions = useMemo(() => { const dynamic = items.filter((item) => item.kind === "instituicoes").map((item) => ({ id: item.groupIds?.[0] ?? (item.id.startsWith("institution-") ? item.id.slice("institution-".length) : item.id), name: item.title, description: item.description, image: resolveAdminImage(item.image) })); const merged = [...staticInstitutionOptions]; for (const institution of dynamic) { const index = merged.findIndex((candidate) => candidate.id === institution.id || candidate.name.trim().toLowerCase() === institution.name.trim().toLowerCase()); if (index >= 0) merged[index] = { ...merged[index], ...institution }; else merged.push(institution); } return merged; }, [items]);
   const visibleFiles = useMemo(() => inventory.filter((file) => `${file.name} ${file.path}`.toLowerCase().includes(inventorySearch.toLowerCase())), [inventory, inventorySearch]);
   const visibleItems = useMemo(() => items.filter((item) => (kindFilter === "all" || item.kind === kindFilter) && (institutionFilter === "all" || item.groupIds?.includes(institutionFilter) || `${item.title} ${item.category ?? ""} ${item.description}`.toLowerCase().includes(availableInstitutions.find((option) => option.id === institutionFilter)?.name.toLowerCase() ?? "\0"))), [items, kindFilter, institutionFilter]);
 
