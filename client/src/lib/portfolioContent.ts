@@ -159,7 +159,7 @@ function attachmentFromPath(path: string | null, mime: string | null): Portfolio
 async function rowToPortfolioItem(row: SupabasePortfolioRow): Promise<PortfolioItem> {
   const [image, pdf, attachmentUrl] = await Promise.all([signedStorageUrl(row.image_path), signedStorageUrl(row.pdf_path), signedStorageUrl(row.attachment_path)]);
   const attachment = attachmentFromPath(row.attachment_path, row.mime_type);
-  return { id: row.id, kind: row.kind, title: row.title, description: row.description, category: row.category ?? undefined, image, pdf, attachment: attachment ? { ...attachment, url: attachmentUrl ?? "" } : undefined, externalUrl: row.external_url ?? undefined, updatedAt: Date.parse(row.updated_at) || Date.now() };
+  return { id: row.id, kind: row.kind, title: row.title, description: row.description, category: row.category ?? undefined, groupIds: row.group_id ? [row.group_id] : undefined, image, pdf, attachment: attachment ? { ...attachment, url: attachmentUrl ?? "" } : undefined, externalUrl: row.external_url ?? undefined, updatedAt: Date.parse(row.updated_at) || Date.now() };
 }
 
 async function refreshSupabasePortfolioContent(): Promise<PortfolioItem[] | null> {
@@ -350,14 +350,15 @@ async function uploadSupabaseDataUrl(value: string | undefined, path: string): P
 
 async function saveSupabasePortfolioContent(items: PortfolioItem[]): Promise<PortfolioItem[]> {
   if (!supabase) throw new Error("O Supabase não está configurado.");
-  const normalizedItems = await Promise.all(items.map(async (item) => ({ ...item, id: await normalizeSupabaseItemId(item.id) })));
+  const normalizedItems = await Promise.all(items.map(async (item) => ({ ...item, groupIds: item.kind === "instituicoes" && item.id.startsWith("institution-") ? [item.id.slice("institution-".length)] : item.groupIds, id: await normalizeSupabaseItemId(item.id) })));
   const rows = [];
   for (const item of normalizedItems) {
     const imagePath = await uploadSupabaseDataUrl(item.image, `items/${item.id}/image.${getDataUrlAsset(item.image ?? "")?.extension ?? "bin"}`);
     const pdfPath = await uploadSupabaseDataUrl(item.pdf, `items/${item.id}/pdf.pdf`);
     const attachmentAsset = getDataUrlAsset(item.attachment?.url ?? "");
     const attachmentPath = await uploadSupabaseDataUrl(item.attachment?.url, `items/${item.id}/attachment.${attachmentAsset?.extension ?? "bin"}`);
-    rows.push({ id: item.id, kind: item.kind, title: item.title.trim(), description: item.description.trim(), category: item.category ?? null, group_id: null, image_path: imagePath, pdf_path: pdfPath, attachment_path: attachmentPath, external_url: validateExternalUrl(item.externalUrl) ?? null, mime_type: item.attachment?.mime ?? null, file_size: null, status: "published", order_index: 0, updated_at: new Date(item.updatedAt).toISOString() });
+    const institutionGroupId = item.groupIds?.[0] ?? null;
+    rows.push({ id: item.id, kind: item.kind, title: item.title.trim(), description: item.description.trim(), category: item.category ?? null, group_id: institutionGroupId, image_path: imagePath, pdf_path: pdfPath, attachment_path: attachmentPath, external_url: validateExternalUrl(item.externalUrl) ?? null, mime_type: item.attachment?.mime ?? null, file_size: null, status: "published", order_index: 0, updated_at: new Date(item.updatedAt).toISOString() });
   }
   const { data, error } = await supabase.from("portfolio_items").upsert(rows, { onConflict: "id" }).select("*");
   if (error) throw error;
