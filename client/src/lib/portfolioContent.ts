@@ -220,6 +220,10 @@ export async function loadPortfolioContent(): Promise<PortfolioItem[]> {
   return (await loadStoredData<PortfolioItem[] | null>(PORTFOLIO_CACHE_KEY, null)) ?? [];
 }
 
+export async function loadPortfolioContentCache(): Promise<PortfolioItem[]> {
+  return (await loadStoredData<PortfolioItem[] | null>(PORTFOLIO_CACHE_KEY, null)) ?? [];
+}
+
 function encodeContent(value: string): string { return btoa(unescape(encodeURIComponent(value))); }
 function decodeContent(value: string): string { return decodeURIComponent(escape(atob(value.replace(/\n/g, "")))); }
 function githubHeaders(token: string): HeadersInit { return { Authorization: `Bearer ${token.trim()}`, Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28" }; }
