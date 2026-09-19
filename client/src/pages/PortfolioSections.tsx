@@ -13,16 +13,17 @@ function normalizedLabel(value: string | undefined) {
 }
 
 const customCertificateGroups = (item: PortfolioItem) => {
-  const label = normalizedLabel(`${item.category ?? ""} ${item.title}`);
+  const label = normalizedLabel(`${item.category ?? ""} ${item.title} ${item.description}`);
   if (label.includes("ef set") || label.includes("efset")) return ["efset"];
   if (label.includes("saylor")) return ["saylor"];
-  if (label.includes("uniathena") && label.includes("cambridge")) return ["uniathena", "cambridge"];
-  if (label.includes("uniathena")) return ["uniathena"];
+  if (label.includes("uniathena") && label.includes("cambridge")) return ["uniathena", "cambridge", "fede"];
+  if (label.includes("uniathena")) return ["uniathena", "fede"];
+  if (label.includes("fede")) return ["fede"];
   return ["custom"];
 };
 
 const customCertificateImage = (item: PortfolioItem) => {
-  const label = normalizedLabel(`${item.category ?? ""} ${item.title}`);
+  const label = normalizedLabel(`${item.category ?? ""} ${item.title} ${item.description}`);
   if (label.includes("ef set") || label.includes("efset")) return `${base}/assets/ef-set.png`;
   if (label.includes("saylor")) return `${base}/assets/saylor-academy.jpg`;
   if (item.image) return item.image;
