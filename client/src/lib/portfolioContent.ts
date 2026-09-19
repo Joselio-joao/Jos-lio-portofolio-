@@ -4,7 +4,7 @@ import { hasPortfolioProxySession, loadProxyPortfolioContent, saveProxyPortfolio
 
 export type PortfolioKind = "projectos" | "eventos" | "obras" | "certificados" | "instituicoes";
 export type PortfolioAttachment = { url: string; name: string; mime: string; type: "office" | "video" };
-export type PortfolioItem = { id: string; kind: PortfolioKind; title: string; description: string; category?: string; image?: string; pdf?: string; attachment?: PortfolioAttachment; externalUrl?: string; updatedAt: number };
+export type PortfolioItem = { id: string; kind: PortfolioKind; title: string; description: string; category?: string; groupIds?: string[]; image?: string; pdf?: string; attachment?: PortfolioAttachment; externalUrl?: string; updatedAt: number };
 export type OwnerPublishingDiagnostic = { session: boolean; owner: boolean; canWrite: boolean; itemsReadable: boolean; storageReadable: boolean; issue?: string };
 
 export type GitHubInventoryFile = { name: string; path: string; sha: string; size: number; type: "file" | "dir"; url: string };
