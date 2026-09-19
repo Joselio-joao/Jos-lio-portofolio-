@@ -1,5 +1,5 @@
 export type Group = { id: string; name: string; description: string; image: string };
-export type Certificate = { id: string; title: string; category: string; groupId: string; description: string; image: string; pdf: string };
+export type Certificate = { id: string; title: string; category: string; groupId: string; groupIds?: string[]; description: string; image: string; pdf: string };
 
 export const groups: Group[] = [
   { id: "eiffel", name: "Eiffel", description: "Percurso escolar atual no Liceu nº 1002 BGO Eiffel–Dande.", image: "/assets/liceu-eiffel-dande.png" },
@@ -17,4 +17,4 @@ export const certificates: Certificate[] = [
   ["ciq-econ", "Basics of Oil & Gas - Economics", "Certificate", "cambridge", "Certificate developed and delivered by UniAthena in partnership with Cambridge International Qualifications, UK.", "/assets/ciq.jpg", "/assets/certificate-economics.pdf"],
   ["ciq-finance", "Basics of Oil & Gas - Finance & Accounting", "Certificate", "cambridge", "Certificate developed and delivered by UniAthena in partnership with Cambridge International Qualifications, UK.", "/assets/ciq.jpg", "/assets/certificate-finance.pdf"],
   ["ciq-strategy", "Basics of Oil & Gas - Strategy, Sustainability & Digital Foundations", "Certificate", "cambridge", "Certificate developed and delivered by UniAthena in partnership with Cambridge International Qualifications, UK.", "/assets/ciq.jpg", "/assets/certificate-strategy.pdf"],
-].map(([id, title, category, groupId, description, image, pdf]) => ({ id, title, category, groupId, description, image, pdf } as Certificate));
+].map(([id, title, category, groupId, description, image, pdf]) => ({ id, title, category, groupId, groupIds: groupId === "cambridge" ? ["uniathena", "cambridge"] : [groupId], description, image, pdf } as Certificate));

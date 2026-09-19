@@ -5,7 +5,7 @@ function normalized(value: string) {
 }
 
 export function institutionImage(title: string, currentImage?: string) {
-  if (normalized(title).includes("saylor")) return SAYLOR_ACADEMY_LOGO;
+  if (normalized(title).includes("saylor") && (!currentImage || /manus-storage|saylor-academy-logo/i.test(currentImage))) return SAYLOR_ACADEMY_LOGO;
   if (currentImage) return currentImage;
   return "/assets/ciq.jpg";
 }
