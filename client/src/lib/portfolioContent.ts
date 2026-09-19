@@ -24,6 +24,8 @@ function publicContentUrl(): string {
 function normalizeLegacyAssetUrl(value: string | undefined): string | undefined {
   if (!value || /^(https?:\/\/|data:)/i.test(value)) return value;
   const withoutRepositoryPrefix = value.replace(/^\/Jos-lio-portofolio-\//, "/");
+  const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+  if (withoutRepositoryPrefix.startsWith("/assets/") || withoutRepositoryPrefix.startsWith("/uploads/")) return `${base}${withoutRepositoryPrefix}`;
   return withoutRepositoryPrefix;
 }
 
@@ -33,7 +35,7 @@ function mergeLegacyAssets(items: PortfolioItem[], legacy: PortfolioItem[]): Por
   const merged = items.map((item) => {
     const fallback = byId.get(item.id) ?? byTitle.get(item.title.trim().toLowerCase());
     if (!fallback) return item;
-    return { ...item, image: item.image || fallback.image, pdf: item.pdf || fallback.pdf, attachment: item.attachment?.url ? item.attachment : fallback.attachment, externalUrl: item.externalUrl || fallback.externalUrl };
+    return { ...item, groupIds: item.groupIds?.length ? item.groupIds : fallback.groupIds, image: item.image || fallback.image, pdf: item.pdf || fallback.pdf, attachment: item.attachment?.url ? item.attachment : fallback.attachment, externalUrl: item.externalUrl || fallback.externalUrl };
   });
   const seen = new Set(merged.flatMap((item) => [item.id, item.title.trim().toLowerCase()]));
   return [...merged, ...legacy.filter((item) => !seen.has(item.id) && !seen.has(item.title.trim().toLowerCase()))];
@@ -101,6 +103,7 @@ export function normalizePortfolioItem(input: Pick<PortfolioItem, "kind" | "titl
     title: input.title.trim(),
     description: input.description.trim(),
     category: input.category?.trim() || undefined,
+    groupIds: input.groupIds?.length ? Array.from(new Set(input.groupIds)) : undefined,
     image: input.image,
     pdf: input.pdf,
     attachment: input.attachment,
@@ -156,10 +159,21 @@ function attachmentFromPath(path: string | null, mime: string | null): Portfolio
   return { url: "", name, mime: mime ?? "application/octet-stream", type };
 }
 
+function inferredInstitutionGroups(row: Pick<SupabasePortfolioRow, "group_id" | "title" | "category" | "description">): string[] | undefined {
+  const label = `${row.title} ${row.category ?? ""} ${row.description}`.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  const groups = new Set(row.group_id ? [row.group_id] : []);
+  if (label.includes("uniathena")) groups.add("uniathena");
+  if (label.includes("cambridge")) groups.add("cambridge");
+  if (label.includes("fede")) groups.add("fede");
+  if (label.includes("ef set") || label.includes("efset")) groups.add("efset");
+  if (label.includes("saylor")) groups.add("saylor");
+  return groups.size ? Array.from(groups) : undefined;
+}
+
 async function rowToPortfolioItem(row: SupabasePortfolioRow): Promise<PortfolioItem> {
   const [image, pdf, attachmentUrl] = await Promise.all([signedStorageUrl(row.image_path), signedStorageUrl(row.pdf_path), signedStorageUrl(row.attachment_path)]);
   const attachment = attachmentFromPath(row.attachment_path, row.mime_type);
-  return { id: row.id, kind: row.kind, title: row.title, description: row.description, category: row.category ?? undefined, groupIds: row.group_id ? [row.group_id] : undefined, image, pdf, attachment: attachment ? { ...attachment, url: attachmentUrl ?? "" } : undefined, externalUrl: row.external_url ?? undefined, updatedAt: Date.parse(row.updated_at) || Date.now() };
+  return { id: row.id, kind: row.kind, title: row.title, description: row.description, category: row.category ?? undefined, groupIds: inferredInstitutionGroups(row), image, pdf, attachment: attachment ? { ...attachment, url: attachmentUrl ?? "" } : undefined, externalUrl: row.external_url ?? undefined, updatedAt: Date.parse(row.updated_at) || Date.now() };
 }
 
 async function refreshSupabasePortfolioContent(): Promise<PortfolioItem[] | null> {
