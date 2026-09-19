@@ -34,16 +34,6 @@
     "updatedAt": 1787057230000
   },
   {
-    "id": "uniathena-certificado-1308",
-    "kind": "certificados",
-    "title": "Certificado UniAthena — 1308",
-    "description": "Certificado disponibilizado pela UniAthena.",
-    "category": "UniAthena",
-    "pdf": "https://docs.uniathena.com/prod/user_262009741/certificate/262009741_1308_1786244602_certificate.pdf",
-    "externalUrl": "https://docs.uniathena.com/prod/user_262009741/certificate/262009741_1308_1786244602_certificate.pdf",
-    "updatedAt": 1787057230000
-  },
-  {
     "id": "ef-set-certificado-lent3r",
     "kind": "certificados",
     "title": "Certificado EF SET",
@@ -62,26 +52,6 @@
     "category": "UniAthena",
     "pdf": "https://docs.uniathena.com/prod/user_262009741/certificate/262009741_1320_1786669705_certificate.pdf",
     "externalUrl": "https://docs.uniathena.com/prod/user_262009741/certificate/262009741_1320_1786669705_certificate.pdf",
-    "updatedAt": 1787057230000
-  },
-  {
-    "id": "uniathena-certificado-1319",
-    "kind": "certificados",
-    "title": "Certificado UniAthena — 1319",
-    "description": "Certificado disponibilizado pela UniAthena.",
-    "category": "UniAthena",
-    "pdf": "https://docs.uniathena.com/prod/user_262009741/certificate/262009741_1319_1786788348_certificate.pdf",
-    "externalUrl": "https://docs.uniathena.com/prod/user_262009741/certificate/262009741_1319_1786788348_certificate.pdf",
-    "updatedAt": 1787057230000
-  },
-  {
-    "id": "uniathena-certificado-1307",
-    "kind": "certificados",
-    "title": "Certificado UniAthena — 1307",
-    "description": "Certificado disponibilizado pela UniAthena.",
-    "category": "UniAthena",
-    "pdf": "https://docs.uniathena.com/prod/user_262009741/certificate/262009741_1307_1786975843_certificate.pdf",
-    "externalUrl": "https://docs.uniathena.com/prod/user_262009741/certificate/262009741_1307_1786975843_certificate.pdf",
     "updatedAt": 1787057230000
   },
   {
