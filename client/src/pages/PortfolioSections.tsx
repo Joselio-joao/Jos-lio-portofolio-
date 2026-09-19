@@ -29,6 +29,45 @@ const customCertificateImage = (item: PortfolioItem) => {
   return `${base}/assets/ciq.jpg`;
 };
 
+type DisplayCertificate = {
+  id: string;
+  title: string;
+  category: string;
+  groupId: string;
+  groupIds: string[];
+  description: string;
+  image: string;
+  pdf: string;
+  attachment?: PortfolioItem["attachment"];
+  externalUrl?: string;
+};
+
+function isTranscript(item: Pick<PortfolioItem, "title" | "category" | "description">) {
+  return /transcript|record of learning|record of achievement|historico/i.test(`${item.title} ${item.category ?? ""} ${item.description}`);
+}
+
+function certificateKey(item: Pick<DisplayCertificate, "id" | "title" | "pdf" | "externalUrl">) {
+  const titleKey = normalizedLabel(item.title).replace(/certificat[oe]|certificate|cr\d+/g, "").replace(/[^a-z0-9]+/g, " ").trim();
+  if (titleKey) return `title:${titleKey}`;
+  const documentUrl = item.pdf || item.externalUrl;
+  if (documentUrl) return documentUrl.split("#")[0].split("?")[0].replace(/\/$/, "").toLowerCase();
+  return item.id;
+}
+
+function isSharedCertificate(item: Pick<DisplayCertificate, "groupIds" | "title" | "description">) {
+  return item.groupIds.includes("uniathena") && item.groupIds.includes("cambridge") || /uniathena.*cambridge|cambridge.*uniathena/i.test(`${item.title} ${item.description}`);
+}
+
+function deduplicateCertificates(items: DisplayCertificate[]) {
+  const unique = new Map<string, DisplayCertificate>();
+  for (const item of items) {
+    const key = certificateKey(item);
+    const existing = unique.get(key);
+    if (!existing || (!isSharedCertificate(existing) && isSharedCertificate(item))) unique.set(key, item);
+  }
+  return Array.from(unique.values());
+}
+
 function AttachmentCard({ attachment }: { attachment?: PortfolioItem["attachment"] }) {
   if (!attachment) return null;
   if (attachment.type === "video") return <div className="mt-4 overflow-hidden rounded-xl bg-black"><video controls preload="metadata" className="max-h-72 w-full" src={attachment.url}><track kind="captions" /></video><p className="flex items-center gap-2 px-3 py-2 text-[10px] text-white"><Video className="h-3.5 w-3.5" />{attachment.name}</p></div>;
@@ -87,7 +126,7 @@ export function CertificatesPage() {
   const [customItems, setCustomItems] = useState<PortfolioItem[]>([]);
   const [openPdfId, setOpenPdfId] = useState<string | null>(null);
   useEffect(() => { loadPortfolioContent().then((stored) => setCustomItems(itemsForKind(stored, "certificados"))).catch(() => setCustomItems([])); }, []);
-  const allCertificates = useMemo(() => [...certificates.map((item) => ({ ...item, attachment: undefined, externalUrl: item.pdf, groupIds: item.groupIds || [item.groupId] })), ...customItems.map((item) => ({ id: item.id, title: item.title, category: item.category || "Certificate", groupId: customCertificateGroups(item)[0], groupIds: customCertificateGroups(item), description: item.description, image: customCertificateImage(item), pdf: item.pdf || "", attachment: item.attachment, externalUrl: item.externalUrl || item.pdf || "" }))], [customItems]);
+  const allCertificates = useMemo(() => deduplicateCertificates([...certificates.map((item) => ({ ...item, attachment: undefined, externalUrl: item.pdf, groupIds: item.groupIds || [item.groupId] })), ...customItems.filter((item) => !isTranscript(item)).map((item) => ({ id: item.id, title: item.title, category: item.category || "Certificate", groupId: customCertificateGroups(item)[0], groupIds: customCertificateGroups(item), description: item.description, image: customCertificateImage(item), pdf: item.pdf || "", attachment: item.attachment, externalUrl: item.externalUrl || item.pdf || "" }))]), [customItems]);
   const [groupId, setGroupId] = useState("all");
   const [category, setCategory] = useState("Todos");
   const [search, setSearch] = useState("");

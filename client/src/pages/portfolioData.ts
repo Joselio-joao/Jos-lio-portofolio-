@@ -10,10 +10,6 @@ export const groups: Group[] = [
 ];
 
 export const certificates: Certificate[] = [
-  ["CR1561", "Basics of Oil & Gas - Economics (CR1561)", "Transcript", "uniathena", "Record of Learning and Achievement — UniAthena.", "/assets/uniathena.png", "/assets/CR1561.pdf"],
-  ["CR1562", "Basics of Oil & Gas - Reserves, Risk & Value (CR1562)", "Transcript", "uniathena", "Record of Learning and Achievement — UniAthena.", "/assets/uniathena.png", "/assets/CR1562.pdf"],
-  ["CR1573", "Basics of Oil & Gas - Finance & Accounting (CR1573)", "Transcript", "uniathena", "Record of Learning and Achievement — UniAthena.", "/assets/uniathena.png", "/assets/CR1573.pdf"],
-  ["CR1574", "Basics of Oil & Gas - Strategy, Sustainability & Digital Foundations (CR1574)", "Transcript", "uniathena", "Record of Learning and Achievement — UniAthena.", "/assets/uniathena.png", "/assets/CR1574.pdf"],
   ["ciq-econ", "Basics of Oil & Gas - Economics", "Certificate", "cambridge", "Certificate developed and delivered by UniAthena in partnership with Cambridge International Qualifications, UK.", "/assets/ciq.jpg", "/assets/certificate-economics.pdf"],
   ["ciq-finance", "Basics of Oil & Gas - Finance & Accounting", "Certificate", "cambridge", "Certificate developed and delivered by UniAthena in partnership with Cambridge International Qualifications, UK.", "/assets/ciq.jpg", "/assets/certificate-finance.pdf"],
   ["ciq-strategy", "Basics of Oil & Gas - Strategy, Sustainability & Digital Foundations", "Certificate", "cambridge", "Certificate developed and delivered by UniAthena in partnership with Cambridge International Qualifications, UK.", "/assets/ciq.jpg", "/assets/certificate-strategy.pdf"],
