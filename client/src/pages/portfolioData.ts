@@ -6,6 +6,7 @@ export const groups: Group[] = [
   { id: "uniathena", name: "UniAthena", description: "Transcripts de aprendizagem e realização académica.", image: "/assets/uniathena.png" },
   { id: "cambridge", name: "UniAthena + Cambridge International Qualifications", description: "Certificados desenvolvidos e entregues em parceria com a Cambridge International Qualifications, UK.", image: "/assets/ciq.jpg" },
   { id: "efset", name: "EF SET", description: "Certificação internacional de inglês — nível B1 Intermediate.", image: "/assets/ef-set.png" },
+  { id: "saylor", name: "Saylor.org Academy", description: "Formação online e certificados académicos da Saylor.org Academy.", image: "/assets/saylor-academy.jpg" },
 ];
 
 export const certificates: Certificate[] = [

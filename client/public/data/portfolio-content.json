@@ -49,6 +49,7 @@
     "title": "Certificado EF SET",
     "description": "Comprovativo de proficiência em inglês emitido pela EF SET.",
     "category": "EF SET",
+    "image": "/Jos-lio-portofolio-/assets/ef-set.png",
     "pdf": "/Jos-lio-portofolio-/assets/EFSETCertificate.pdf",
     "externalUrl": "https://cert.efset.org/LeNt3R",
     "updatedAt": 1787057230000
@@ -82,5 +83,15 @@
     "pdf": "https://docs.uniathena.com/prod/user_262009741/certificate/262009741_1307_1786975843_certificate.pdf",
     "externalUrl": "https://docs.uniathena.com/prod/user_262009741/certificate/262009741_1307_1786975843_certificate.pdf",
     "updatedAt": 1787057230000
+  },
+  {
+    "id": "saylor-org-academy",
+    "kind": "instituicoes",
+    "title": "Saylor.org Academy",
+    "description": "Formação online e certificados académicos da Saylor.org Academy.",
+    "category": "Instituição",
+    "image": "/Jos-lio-portofolio-/assets/saylor-academy.jpg",
+    "externalUrl": "https://learn.saylor.org/",
+    "updatedAt": 1789796800000
   }
 ]

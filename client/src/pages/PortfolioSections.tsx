@@ -7,7 +7,27 @@ import { Link, useLocation } from "wouter";
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 const LINKEDIN = "https://www.linkedin.com/in/josélio-joão-b02776424";
-const customCertificateImage = (item: PortfolioItem) => item.image || (item.category === "EF SET" ? `${base}/assets/ef-set.png` : item.category === "UniAthena" ? `${base}/assets/uniathena.png` : `${base}/assets/ciq.jpg`);
+function normalizedLabel(value: string | undefined) {
+  return String(value ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+
+const customCertificateGroup = (item: PortfolioItem) => {
+  const label = normalizedLabel(`${item.category ?? ""} ${item.title}`);
+  if (label.includes("ef set") || label.includes("efset")) return "efset";
+  if (label.includes("saylor")) return "saylor";
+  if (label.includes("uniathena") && label.includes("cambridge")) return "cambridge";
+  if (label.includes("uniathena")) return "uniathena";
+  return "custom";
+};
+
+const customCertificateImage = (item: PortfolioItem) => {
+  const label = normalizedLabel(`${item.category ?? ""} ${item.title}`);
+  if (label.includes("ef set") || label.includes("efset")) return `${base}/assets/ef-set.png`;
+  if (label.includes("saylor")) return `${base}/assets/saylor-academy.jpg`;
+  if (item.image) return item.image;
+  if (label.includes("uniathena")) return `${base}/assets/uniathena.png`;
+  return `${base}/assets/ciq.jpg`;
+};
 
 function AttachmentCard({ attachment }: { attachment?: PortfolioItem["attachment"] }) {
   if (!attachment) return null;
@@ -67,7 +87,7 @@ export function CertificatesPage() {
   const [customItems, setCustomItems] = useState<PortfolioItem[]>([]);
   const [openPdfId, setOpenPdfId] = useState<string | null>(null);
   useEffect(() => { loadPortfolioContent().then((stored) => setCustomItems(itemsForKind(stored, "certificados"))).catch(() => setCustomItems([])); }, []);
-  const allCertificates = useMemo(() => [...certificates.map((item) => ({ ...item, attachment: undefined, externalUrl: item.pdf })), ...customItems.map((item) => ({ id: item.id, title: item.title, category: item.category || "Certificate", groupId: "custom", description: item.description, image: customCertificateImage(item), pdf: item.pdf || "", attachment: item.attachment, externalUrl: item.externalUrl || item.pdf || "" }))], [customItems]);
+  const allCertificates = useMemo(() => [...certificates.map((item) => ({ ...item, attachment: undefined, externalUrl: item.pdf })), ...customItems.map((item) => ({ id: item.id, title: item.title, category: item.category || "Certificate", groupId: customCertificateGroup(item), description: item.description, image: customCertificateImage(item), pdf: item.pdf || "", attachment: item.attachment, externalUrl: item.externalUrl || item.pdf || "" }))], [customItems]);
   const [groupId, setGroupId] = useState("all");
   const [category, setCategory] = useState("Todos");
   const [search, setSearch] = useState("");
