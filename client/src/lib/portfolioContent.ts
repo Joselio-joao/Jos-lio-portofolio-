@@ -355,7 +355,7 @@ function storagePathFromUrl(value: string | undefined): string | null {
 async function uploadSupabaseDataUrl(value: string | undefined, path: string): Promise<string | null> {
   if (!value || !supabase) return null;
   const asset = getDataUrlAsset(value);
-  if (!asset) return storagePathFromUrl(value);
+  if (!asset) return storagePathFromUrl(value) ?? value;
   const binary = Uint8Array.from(atob(asset.content), (character) => character.charCodeAt(0));
   const { error } = await supabase.storage.from("portfolio-private").upload(path, binary, { contentType: asset.mime, upsert: true });
   if (error) throw error;
