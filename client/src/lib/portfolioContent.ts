@@ -203,9 +203,8 @@ export async function diagnoseOwnerPublishing(): Promise<OwnerPublishingDiagnost
 export async function loadPortfolioContent(): Promise<PortfolioItem[]> {
   const supabaseSession = supabase ? (await supabase.auth.getSession()).data.session : null;
   if (supabaseSession) {
-    const supabaseItems = await refreshSupabasePortfolioContent();
+    const [supabaseItems, legacyItems] = await Promise.all([refreshSupabasePortfolioContent(), refreshPortfolioContent()]);
     if (supabaseItems !== null) {
-      const legacyItems = await refreshPortfolioContent();
       const mergedItems = legacyItems && legacyItems.length > 0 ? (supabaseItems.length > 0 ? mergeLegacyAssets(supabaseItems, legacyItems) : legacyItems) : supabaseItems;
       await saveStoredData(PORTFOLIO_CACHE_KEY, mergedItems).catch(() => undefined);
       return mergedItems;
@@ -213,8 +212,7 @@ export async function loadPortfolioContent(): Promise<PortfolioItem[]> {
   }
   if (hasPortfolioProxySession()) {
     try {
-      const proxyItems = await loadProxyPortfolioContent();
-      const legacyItems = await refreshPortfolioContent();
+      const [proxyItems, legacyItems] = await Promise.all([loadProxyPortfolioContent(), refreshPortfolioContent()]);
       const mergedItems = legacyItems && legacyItems.length > 0 ? (proxyItems.length > 0 ? mergeLegacyAssets(proxyItems, legacyItems) : legacyItems) : proxyItems;
       await saveStoredData(PORTFOLIO_CACHE_KEY, mergedItems).catch(() => undefined);
       return mergedItems;
@@ -224,13 +222,13 @@ export async function loadPortfolioContent(): Promise<PortfolioItem[]> {
       return (await loadStoredData<PortfolioItem[] | null>(PORTFOLIO_CACHE_KEY, null)) ?? [];
     }
   }
+  const fresh = await refreshPortfolioContent();
+  if (fresh !== null) return fresh;
   const supabaseItems = await refreshSupabasePortfolioContent();
   if (supabaseItems !== null) {
     await saveStoredData(PORTFOLIO_CACHE_KEY, supabaseItems).catch(() => undefined);
     return supabaseItems;
   }
-  const fresh = await refreshPortfolioContent();
-  if (fresh !== null) return fresh;
   return (await loadStoredData<PortfolioItem[] | null>(PORTFOLIO_CACHE_KEY, null)) ?? [];
 }
 
