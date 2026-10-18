@@ -81,8 +81,6 @@ export const navItems = [
   { href: `${base}/projectos`, label: "Projectos", icon: FolderKanban },
   { href: `${base}/eventos`, label: "Eventos", icon: CalendarDays },
   { href: `${base}/obras`, label: "Obras", icon: Hammer },
-  { href: `${base}/certificados`, label: "Certificados", icon: Award },
-  { href: `${base}/instituicoes`, label: "Instituições", icon: Building2 },
 ];
 
 export function PortfolioShell({ title, eyebrow, children }: { title: string; eyebrow: string; children: React.ReactNode }) {
@@ -107,7 +105,7 @@ export function BottomNav() {
     }
     navigate(href);
   };
-  return <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-[#dbe3f0] bg-white/95 px-2 pb-[env(safe-area-inset-bottom)] pt-2 shadow-[0_-8px_24px_rgba(23,35,62,.08)] backdrop-blur-xl" aria-label="Navegação principal"><div className="mx-auto grid max-w-3xl grid-cols-6 gap-0">{navItems.map(({ href, label, icon: Icon }) => <Link key={href} href={href} onClick={(event) => goTo(event, href)} className="flex min-w-0 min-h-14 w-full flex-col items-center justify-center gap-0.5 rounded-xl px-0 py-2.5 text-center text-[9px] font-semibold leading-3 text-[#65718a] whitespace-normal break-words transition active:scale-[.98] hover:bg-[#f0edff] hover:text-[#6c5ce7] sm:gap-1 sm:px-1.5 sm:text-xs sm:leading-tight"><Icon className="h-5 w-5 shrink-0" />{label}</Link>)}</div></nav>;
+  return <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-[#dbe3f0] bg-white/95 px-2 pb-[env(safe-area-inset-bottom)] pt-2 shadow-[0_-8px_24px_rgba(23,35,62,.08)] backdrop-blur-xl" aria-label="Navegação principal"><div className="mx-auto grid max-w-3xl grid-cols-4 gap-0">{navItems.map(({ href, label, icon: Icon }) => <Link key={href} href={href} onClick={(event) => goTo(event, href)} className="flex min-w-0 min-h-14 w-full flex-col items-center justify-center gap-0.5 rounded-xl px-0 py-2.5 text-center text-[9px] font-semibold leading-3 text-[#65718a] whitespace-normal break-words transition active:scale-[.98] hover:bg-[#f0edff] hover:text-[#6c5ce7] sm:gap-1 sm:px-1.5 sm:text-xs sm:leading-tight"><Icon className="h-5 w-5 shrink-0" />{label}</Link>)}</div></nav>;
 }
 
 function normalizedKind(value: unknown): string {

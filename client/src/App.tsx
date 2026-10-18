@@ -5,7 +5,7 @@ import { Route, Router as WouterRouter, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
-import { CertificatesPage, InstitutionsPage, PlaceholderPage } from "./pages/PortfolioSections";
+import { PlaceholderPage } from "./pages/PortfolioSections";
 import { CalendarDays, FolderKanban, Hammer } from "lucide-react";
 import PortfolioAdmin from "./pages/PortfolioAdmin";
 import PortfolioAccessGate from "./components/PortfolioAccessGate";
@@ -26,10 +26,6 @@ function Router() {
         <Route path={"/Jos-lio-portofolio-/eventos"} component={() => <PlaceholderPage title="Eventos" eyebrow="Participação" icon={CalendarDays} kind="eventos" description="Página dedicada a eventos, encontros, palestras e actividades relevantes na jornada de Josélio João." />} />
         <Route path={"/obras"} component={() => <PlaceholderPage title="Obras" eyebrow="Produção" icon={Hammer} kind="obras" description="Espaço para reunir obras, criações, invenções e outros trabalhos desenvolvidos ao longo do percurso." />} />
         <Route path={"/Jos-lio-portofolio-/obras"} component={() => <PlaceholderPage title="Obras" eyebrow="Produção" icon={Hammer} kind="obras" description="Espaço para reunir obras, criações, invenções e outros trabalhos desenvolvidos ao longo do percurso." />} />
-        <Route path={"/certificados"} component={CertificatesPage} />
-        <Route path={"/Jos-lio-portofolio-/certificados"} component={CertificatesPage} />
-        <Route path={"/instituicoes"} component={InstitutionsPage} />
-        <Route path={"/Jos-lio-portofolio-/instituicoes"} component={InstitutionsPage} />
         <Route path={"/gestao"} component={PortfolioAdmin} />
         <Route path={"/Jos-lio-portofolio-/gestao"} component={PortfolioAdmin} />
         <Route path={"/404"} component={NotFound} />
