@@ -1,6 +1,7 @@
 import { saveStoredData, loadStoredData } from "./offlineStorage";
 import { supabase } from "./supabase";
 import { hasPortfolioProxySession, loadProxyPortfolioContent, saveProxyPortfolioContent } from "./portfolioProxy";
+import type { Session } from "@supabase/supabase-js";
 
 export type PortfolioKind = "projectos" | "eventos" | "obras" | "certificados" | "instituicoes";
 export type PortfolioAttachment = { url: string; name: string; mime: string; type: "office" | "video" };
@@ -201,7 +202,14 @@ export async function diagnoseOwnerPublishing(): Promise<OwnerPublishingDiagnost
 }
 
 export async function loadPortfolioContent(): Promise<PortfolioItem[]> {
-  const supabaseSession = supabase ? (await supabase.auth.getSession()).data.session : null;
+  let supabaseSession: Session | null = null;
+  if (supabase) {
+    try {
+      supabaseSession = (await supabase.auth.getSession()).data.session;
+    } catch {
+      supabaseSession = null;
+    }
+  }
   if (supabaseSession) {
     const [supabaseItems, legacyItems] = await Promise.all([refreshSupabasePortfolioContent(), refreshPortfolioContent()]);
     if (supabaseItems !== null) {

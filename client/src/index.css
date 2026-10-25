@@ -63,6 +63,9 @@ body {
   color: var(--foreground);
   font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif;
 }
+html.public-portfolio, html.public-portfolio body { -webkit-user-select: none; user-select: none; }
+html.public-portfolio img { -webkit-user-drag: none; user-drag: none; }
+@media print { html.public-portfolio body { display: none !important; } }
 button, a, input { transition: transform 160ms var(--ease-out), background-color 180ms var(--ease-out), color 180ms var(--ease-out), border-color 180ms var(--ease-out), opacity 180ms var(--ease-out); }
 button:active, a:active { transform: scale(0.97); }
 button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 3px solid color-mix(in srgb, var(--ring) 55%, transparent); outline-offset: 3px; }
