@@ -11,7 +11,7 @@ export default function NotFound() {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
+    <main className="flex min-h-screen w-full items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 px-4" aria-labelledby="not-found-title">
       <Card className="w-full max-w-lg mx-4 shadow-lg border-0 bg-white/80 backdrop-blur-sm">
         <CardContent className="pt-8 pb-8 text-center">
           <div className="flex justify-center mb-6">
@@ -21,16 +21,16 @@ export default function NotFound() {
             </div>
           </div>
 
-          <h1 className="text-4xl font-bold text-slate-900 mb-2">404</h1>
+          <h1 id="not-found-title" className="mb-2 text-4xl font-bold text-slate-900">404</h1>
 
-          <h2 className="text-xl font-semibold text-slate-700 mb-4">
-            Page Not Found
+          <h2 className="mb-4 text-xl font-semibold text-slate-700">
+            Página não encontrada
           </h2>
 
-          <p className="text-slate-600 mb-8 leading-relaxed">
-            Sorry, the page you are looking for doesn't exist.
+          <p className="mb-8 leading-relaxed text-slate-600">
+            A página que procura não existe.
             <br />
-            It may have been moved or deleted.
+            Pode ter sido movida ou removida.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -39,11 +39,11 @@ export default function NotFound() {
               className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg transition-[background-color,box-shadow,transform] duration-200 shadow-md hover:shadow-lg"
             >
               <Home className="w-4 h-4 mr-2" />
-              Go Home
+              Voltar ao início
             </Button>
           </div>
         </CardContent>
       </Card>
-    </div>
+    </main>
   );
 }
